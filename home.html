@@ -184,13 +184,21 @@
             max-height: calc(100vh - 60px);
         }
 
-        @media (max-width: 1200px) {
-            .container {
-                grid-template-columns: 80px 1fr;
-            }
-            .right-sidebar {
-                display: none;
-            }
+        .event-item {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .event-name {
+            font-weight: 600;
+        }
+
+        .event-date {
+            font-size: 12px;
+            color: var(--secondary-color);
         }
     </style>
 </head>
@@ -199,14 +207,13 @@
         <div class="top-bar">
             <div class="logo">Artemis SMMS</div>
             <div class="date-time" id="date-time"></div>
-            <img src="https://i.pravatar.cc/150?img=68" alt="User Avatar" class="user-avatar">
+            <img src="https://i.pravatar.cc/150?img=12" alt="User Avatar" class="user-avatar">
         </div>
         <nav class="nav-sidebar">
             <a href="#" class="nav-item active"><i class="fas fa-home"></i></a>
             <a href="#" class="nav-item"><i class="fas fa-rocket"></i></a>
             <a href="#" class="nav-item"><i class="fas fa-satellite"></i></a>
             <a href="#" class="nav-item"><i class="fas fa-chart-line"></i></a>
-            <a href="#" class="nav-item"><i class="fas fa-users"></i></a>
             <a href="#" class="nav-item"><i class="fas fa-cog"></i></a>
         </nav>
         <main class="main-content">
@@ -231,29 +238,7 @@
             <div class="panel elongated">
                 <h3 class="panel-title">Data Transmission</h3>
                 <div class="panel-content">
-                    <div class="data-value">1.2 PB</div>
-                    <div class="data-label">Data Transmitted Today</div>
                     <canvas id="dataTransmissionChart"></canvas>
-                </div>
-            </div>
-            <div class="panel elongated">
-                <h3 class="panel-title">Mission Status</h3>
-                <div class="panel-content">
-                    <div class="mission-item">Mars Rover Deployment: In Progress (Day 37)</div>
-                    <div class="mission-item">ISS Resupply: Scheduled in 3 days</div>
-                    <div class="mission-item">Lunar Gateway Construction: Planning Phase (Week 12)</div>
-                    <div class="mission-item">Asteroid Redirect Mission: Trajectory Calculation</div>
-                    <div class="mission-item">ExoMars: Awaiting Launch Window (T-45 days)</div>
-                </div>
-            </div>
-            <div class="panel elongated">
-                <h3 class="panel-title">Critical Alerts</h3>
-                <div class="panel-content">
-                    <div class="alert-item">Warning: Increased solar activity detected - Potential impact on communications</div>
-                    <div class="alert-item">Notice: Scheduled maintenance for Satellite A-127 in 6 hours</div>
-                    <div class="alert-item">Alert: Space debris detected in LEO, collision risk assessment in progress</div>
-                    <div class="alert-item">Caution: Atmospheric anomaly detected over mission control, weather systems on standby</div>
-                    <div class="alert-item">Update: Firmware update required for 15% of satellite network</div>
                 </div>
             </div>
             <div class="panel">
@@ -265,17 +250,23 @@
             <div class="panel">
                 <h3 class="panel-title">Launch Success Rate</h3>
                 <div class="panel-content">
-                    <div class="data-value">98.7%</div>
-                    <div class="data-label">Last 100 Launches</div>
                     <canvas id="launchSuccessChart"></canvas>
                 </div>
             </div>
-            <div class="panel">
-                <h3 class="panel-title">Interplanetary Network Status</h3>
-                <div class="panel-content">
-                    <div class="data-value">4/5</div>
-                    <div class="data-label">Nodes Online</div>
-                    <div id="networkStatus"></div>
+            <div class="panel elongated">
+                <h3 class="panel-title">Mission Status</h3>
+                <div class="panel-content" id="missionStatus">
+                    <div class="mission-item">Mars Rover Deployment: In Progress</div>
+                    <div class="mission-item">ISS Resupply: Scheduled in 3 days</div>
+                    <div class="mission-item">Lunar Gateway Construction: Planning Phase</div>
+                </div>
+            </div>
+            <div class="panel elongated">
+                <h3 class="panel-title">Critical Alerts</h3>
+                <div class="panel-content" id="criticalAlerts">
+                    <div class="alert-item">Warning: Increased solar activity detected</div>
+                    <div class="alert-item">Notice: Scheduled maintenance for Satellite A-127</div>
+                    <div class="alert-item">Alert: Debris detected in LEO, monitoring closely</div>
                 </div>
             </div>
         </main>
@@ -294,15 +285,16 @@
                 </div>
             </div>
             <div class="panel">
+                <h3 class="panel-title">Interplanetary Network Status</h3>
+                <div class="panel-content" id="networkStatus"></div>
+            </div>
+            <div class="panel">
                 <h3 class="panel-title">Upcoming Events</h3>
-                <div class="panel-content" id="upcomingEvents">
-                    <!-- Dynamically populated -->
-                </div>
+                <div class="panel-content" id="upcomingEvents"></div>
             </div>
         </aside>
     </div>
     <script>
-        // Earth Visualization
         function createEarthVisualization() {
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(75, 2, 0.1, 1000);
@@ -347,7 +339,6 @@
         }
         createEarthVisualization();
 
-        // Date and Time
         function updateDateTime() {
             const now = new Date();
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
@@ -356,7 +347,6 @@
         setInterval(updateDateTime, 1000);
         updateDateTime();
 
-        // Countdown Timer
         function updateCountdown() {
             const launchDate = new Date('2023-12-31T00:00:00').getTime();
             const now = new Date().getTime();
@@ -373,8 +363,8 @@
         updateCountdown();
 
         // System Health Chart
-        const systemHealthCtx = document.getElementById('systemHealthChart').getContext('2d');
-        new Chart(systemHealthCtx, {
+        const ctx = document.getElementById('systemHealthChart').getContext('2d');
+        new Chart(ctx, {
             type: 'doughnut',
             data: {
                 labels: ['Optimal', 'Good', 'Fair', 'Poor'],

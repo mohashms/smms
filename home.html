@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Artemis SMMS - Mission Control</title>
+    <title>Artemis SMMS - Advanced Mission Control</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -38,7 +38,7 @@
 
         .container {
             display: grid;
-            grid-template-columns: 80px 1fr 250px;
+            grid-template-columns: 80px 1fr 300px;
             grid-template-rows: auto 1fr;
             height: 100vh;
             gap: 20px;
@@ -67,21 +67,71 @@
             color: var(--secondary-color);
         }
 
-        .sidebar {
+        .nav-sidebar {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
             background-color: var(--surface-color);
             backdrop-filter: blur(10px);
             border-radius: 15px;
-            padding: 20px;
+        }
+
+        .nav-top, .nav-bottom {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .nav-item {
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 15px;
+            border-radius: 10px;
+            transition: background-color 0.2s ease;
+            font-size: 20px;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .main-content {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(2, 1fr);
+            grid-template-rows: repeat(3, 1fr);
             gap: 20px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .main-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .main-content::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .main-content::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
         }
 
         .panel {
@@ -95,9 +145,9 @@
         }
 
         .panel-title {
-            font-size: 16px;
-            font-weight: 500;
-            margin-bottom: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
             color: var(--primary-color);
         }
 
@@ -129,31 +179,11 @@
             height: 100%;
         }
 
-        .nav-sidebar {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 0;
-            background-color: var(--surface-color);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
+        .data-transmission, .missions, .alerts {
+            grid-row: span 2;
         }
 
-        .nav-item {
-            color: var(--text-color);
-            text-decoration: none;
-            padding: 15px;
-            border-radius: 10px;
-            transition: background-color 0.2s ease;
-            font-size: 20px;
-        }
-
-        .nav-item:hover, .nav-item.active {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .alert-item {
+        .alert-item, .mission-item {
             background-color: rgba(255, 107, 107, 0.2);
             border-radius: 8px;
             padding: 10px;
@@ -163,29 +193,16 @@
 
         .mission-item {
             background-color: rgba(0, 168, 255, 0.2);
-            border-radius: 8px;
-            padding: 10px;
-            margin-bottom: 10px;
-            font-size: 14px;
         }
 
-        @media (max-width: 1200px) {
-            .container {
-                grid-template-columns: 80px 1fr;
-            }
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
 
-            .sidebar {
-                display: none;
-            }
-
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-
-            .earth-viz {
-                grid-column: span 1;
-                grid-row: span 1;
-            }
+        .sidebar .panel {
+            flex: 1;
         }
     </style>
 </head>
@@ -196,15 +213,17 @@
             <div class="date-time" id="date-time"></div>
         </div>
         <nav class="nav-sidebar">
-            <div>
+            <div class="nav-top">
                 <a href="#" class="nav-item active"><i class="fas fa-home"></i></a>
                 <a href="#" class="nav-item"><i class="fas fa-rocket"></i></a>
                 <a href="#" class="nav-item"><i class="fas fa-satellite"></i></a>
                 <a href="#" class="nav-item"><i class="fas fa-chart-line"></i></a>
             </div>
-            <div>
+            <div class="nav-bottom">
                 <a href="#" class="nav-item"><i class="fas fa-cog"></i></a>
-                <a href="#" class="nav-item"><i class="fas fa-user"></i></a>
+                <div class="user-avatar">
+                    <img src="https://i.pravatar.cc/150?img=12" alt="User Avatar">
+                </div>
             </div>
         </nav>
         <main class="main-content">
@@ -226,27 +245,46 @@
                     <div class="data-label">Operational Satellites</div>
                 </div>
             </div>
-            <div class="panel">
+            <div class="panel data-transmission">
                 <h3 class="panel-title">Data Transmission</h3>
                 <div class="panel-content">
                     <div class="data-value">1.2 PB</div>
                     <div class="data-label">Data Transmitted Today</div>
+                    <canvas id="dataTransmissionChart"></canvas>
                 </div>
             </div>
-            <div class="panel">
-                <h3 class="panel-title">Missions</h3>
+            <div class="panel missions">
+                <h3 class="panel-title">Active Missions</h3>
                 <div class="panel-content">
                     <div class="mission-item">Mars Rover Deployment: In Progress</div>
                     <div class="mission-item">ISS Resupply: Scheduled in 3 days</div>
                     <div class="mission-item">Lunar Gateway Construction: Planning Phase</div>
+                    <div class="mission-item">Asteroid Redirect Mission: Preparation</div>
+                    <div class="mission-item">ExoMars: Awaiting Launch Window</div>
                 </div>
             </div>
-            <div class="panel">
-                <h3 class="panel-title">Alerts</h3>
+            <div class="panel alerts">
+                <h3 class="panel-title">Critical Alerts</h3>
                 <div class="panel-content">
                     <div class="alert-item">Warning: Increased solar activity detected</div>
                     <div class="alert-item">Notice: Scheduled maintenance for Satellite A-127</div>
                     <div class="alert-item">Alert: Debris detected in LEO, monitoring closely</div>
+                    <div class="alert-item">Caution: Atmospheric anomaly affecting communication</div>
+                    <div class="alert-item">Update: Propulsion system check required for Mars Orbiter</div>
+                </div>
+            </div>
+            <div class="panel">
+                <h3 class="panel-title">Resource Utilization</h3>
+                <div class="panel-content">
+                    <canvas id="resourceUtilizationChart"></canvas>
+                </div>
+            </div>
+            <div class="panel">
+                <h3 class="panel-title">Mission Success Rate</h3>
+                <div class="panel-content">
+                    <div class="data-value">98.7%</div>
+                    <div class="data-label">Overall Success Rate</div>
+                    <canvas id="missionSuccessChart"></canvas>
                 </div>
             </div>
         </main>
@@ -264,9 +302,18 @@
                     <canvas id="systemHealthChart"></canvas>
                 </div>
             </div>
+            <div class="panel">
+                <h3 class="panel-title">Weather Conditions</h3>
+                <div class="panel-content">
+                    <div class="data-value">Clear</div>
+                    <div class="data-label">Launch Site Weather</div>
+                    <canvas id="weatherChart"></canvas>
+                </div>
+            </div>
         </aside>
     </div>
     <script>
+        // Earth Visualization
         function createEarthVisualization() {
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(75, 2, 0.1, 1000);
@@ -311,6 +358,7 @@
         }
         createEarthVisualization();
 
+        // Date and Time
         function updateDateTime() {
             const now = new Date();
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
@@ -319,6 +367,7 @@
         setInterval(updateDateTime, 1000);
         updateDateTime();
 
+        // Countdown Timer
         function updateCountdown() {
             const launchDate = new Date('2023-12-31T00:00:00').getTime();
             const now = new Date().getTime();
@@ -334,8 +383,9 @@
         setInterval(updateCountdown, 1000);
         updateCountdown();
 
-        const ctx = document.getElementById('systemHealthChart').getContext('2d');
-        new Chart(ctx, {
+        // System Health Chart
+        const systemHealthCtx = document.getElementById('systemHealthChart').getContext('2d');
+        new Chart(systemHealthCtx, {
             type: 'doughnut',
             data: {
                 labels: ['Optimal', 'Good', 'Fair', 'Poor'],
@@ -357,6 +407,192 @@
                             font: {
                                 size: 12
                             }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Data Transmission Chart
+        const dataTransmissionCtx = document.getElementById('dataTransmissionChart').getContext('2d');
+        new Chart(dataTransmissionCtx, {
+            type: 'line',
+            data: {
+                labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+                datasets: [{
+                    label: 'Data Transmitted (TB)',
+                    data: [200, 300, 280, 500, 450, 600],
+                    borderColor: '#00a8ff',
+                    tension: 0.4,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: '#ffffff'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: '#ffffff'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        // Resource Utilization Chart
+        const resourceUtilizationCtx = document.getElementById('resourceUtilizationChart').getContext('2d');
+        new Chart(resourceUtilizationCtx, {
+            type: 'bar',
+            data: {
+                labels: ['CPU', 'Memory', 'Storage', 'Network'],
+                datasets: [{
+                    label: 'Utilization (%)',
+                    data: [85, 72, 60, 90],
+                    backgroundColor: ['#00a8ff', '#ffd700', '#ff9f43', '#ee5253'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: '#ffffff'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: '#ffffff'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        // Mission Success Chart
+        const missionSuccessCtx = document.getElementById('missionSuccessChart').getContext('2d');
+        new Chart(missionSuccessCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Success Rate (%)',
+                    data: [98, 97.5, 99, 98.7, 98.2, 98.7],
+                    borderColor: '#00a8ff',
+                    tension: 0.4,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 95,
+                        max: 100,
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: '#ffffff'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: '#ffffff'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        // Weather Chart
+        const weatherCtx = document.getElementById('weatherChart').getContext('2d');
+        new Chart(weatherCtx, {
+            type: 'line',
+            data: {
+                labels: ['Now', '+1h', '+2h', '+3h', '+4h', '+5h'],
+                datasets: [{
+                    label: 'Temperature (°C)',
+                    data: [22, 23, 25, 24, 22, 21],
+                    borderColor: '#ffd700',
+                    tension: 0.4,
+                    fill: false
+                }, {
+                    label: 'Wind Speed (km/h)',
+                    data: [10, 12, 15, 14, 11, 9],
+                    borderColor: '#00a8ff',
+                    tension: 0.4,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: '#ffffff'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: '#ffffff'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#ffffff'
                         }
                     }
                 }

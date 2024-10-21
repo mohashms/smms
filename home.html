@@ -3,22 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Artemis SMMS - Advanced Mission Control Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Artemis SMMS - Mission Control Interface</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;700&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
-            --primary-color: #007AFF;
-            --secondary-color: #5AC8FA;
-            --background-color: #000000;
-            --surface-color: #1C1C1E;
-            --text-color: #FFFFFF;
-            --text-secondary-color: #8E8E93;
-            --success-color: #34C759;
-            --warning-color: #FF9500;
-            --danger-color: #FF3B30;
+            --primary-color: #00FFFF;
+            --secondary-color: #FF4081;
+            --background-color: #000B14;
+            --surface-color: #001F3F;
+            --text-color: #E0F7FA;
+            --accent-color: #FFC400;
         }
 
         * {
@@ -28,431 +24,148 @@
         }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Space Grotesk', sans-serif;
             background-color: var(--background-color);
             color: var(--text-color);
             overflow: hidden;
         }
 
         .container {
-            display: flex;
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            grid-template-rows: 60px 1fr;
             height: 100vh;
         }
 
+        .top-bar {
+            grid-column: 1 / -1;
+            background-color: rgba(0, 31, 63, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 1000;
+        }
+
+        .mission-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .mission-status {
+            font-size: 0.9rem;
+            color: var(--accent-color);
+        }
+
         .sidebar {
-            width: 80px;
-            background-color: var(--surface-color);
-            padding: 1rem 0;
+            background-color: rgba(0, 31, 63, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 20px 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             transition: all 0.3s ease;
         }
 
-        .sidebar:hover {
-            width: 240px;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            margin-bottom: 2rem;
-            text-align: center;
-        }
-
-        .nav-links {
-            list-style-type: none;
+        .nav-item {
             width: 100%;
-        }
-
-        .nav-links li {
-            margin-bottom: 0.5rem;
-        }
-
-        .nav-links a {
-            color: var(--text-secondary-color);
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
+            padding: 15px 0;
             display: flex;
+            justify-content: center;
             align-items: center;
-            padding: 0.75rem 1rem;
-            border-radius: 10px;
-            margin: 0 0.5rem;
+            color: var(--text-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
         }
 
-        .nav-links a:hover, .nav-links a.active {
-            color: var(--primary-color);
-            background-color: rgba(0, 122, 255, 0.1);
+        .nav-item:hover, .nav-item.active {
+            background-color: rgba(0, 255, 255, 0.1);
         }
 
-        .nav-links a i {
-            font-size: 1.2rem;
-            width: 24px;
-            text-align: center;
-        }
-
-        .nav-links a span {
-            margin-left: 1rem;
-            display: none;
-        }
-
-        .sidebar:hover .nav-links a span {
-            display: inline;
+        .nav-item i {
+            font-size: 1.5rem;
         }
 
         .main-content {
-            flex-grow: 1;
-            padding: 2rem;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 20px;
+            padding: 20px;
             overflow-y: auto;
         }
 
-        .dashboard-header {
+        .panel {
+            background-color: var(--surface-color);
+            border-radius: 10px;
+            padding: 20px;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
+            flex-direction: column;
+            box-shadow: 0 4px 6px rgba(0, 255, 255, 0.1);
+            transition: all 0.3s ease;
         }
 
-        .dashboard-title {
+        .panel:hover {
+            box-shadow: 0 8px 12px rgba(0, 255, 255, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .panel-title {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .panel-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .data-value {
+            font-family: 'Roboto Mono', monospace;
             font-size: 2rem;
             font-weight: 700;
             color: var(--text-color);
+            margin-bottom: 10px;
         }
 
-        .date-time {
-            font-size: 1rem;
-            color: var(--text-secondary-color);
+        .data-label {
+            font-size: 0.9rem;
+            color: var(--secondary-color);
         }
 
-        .bento-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .bento-item {
-            background-color: var(--surface-color);
-            border-radius: 20px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            overflow: hidden;
-        }
-
-        .bento-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0, 122, 255, 0.2);
-        }
-
-        .bento-item h3 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: var(--text-secondary-color);
-        }
-
-        .bento-item p {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: var(--text-color);
-        }
-
-        .bento-item.wide {
+        .earth-viz {
             grid-column: span 2;
-        }
-
-        .bento-item.tall {
             grid-row: span 2;
         }
 
-        .chart-container {
-            width: 100%;
-            height: 200px;
+        .mission-timeline {
+            grid-column: span 2;
         }
 
-        .earth-container {
+        .system-health {
+            grid-column: span 2;
+        }
+
+        #earth-container {
             width: 100%;
             height: 100%;
-            min-height: 300px;
         }
 
-        @media (max-width: 1200px) {
-            .bento-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 60px;
-            }
-
-            .sidebar:hover {
-                width: 200px;
-            }
-
-            .bento-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .bento-item.wide, .bento-item.tall {
-                grid-column: span 1;
-                grid-row: span 1;
-            }
-        }
-
-        .status-indicator {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            margin-right: 5px;
-        }
-
-        .status-optimal {
-            background-color: var(--success-color);
-        }
-
-        .status-warning {
-            background-color: var(--warning-color);
-        }
-
-        .status-danger {
-            background-color: var(--danger-color);
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 6px;
+        .timeline {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 4px;
             background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-            overflow: hidden;
-            margin-top: 10px;
+            position: relative;
+            margin-top: 20px;
         }
 
-        .progress-bar-fill {
-            height: 100%;
-            background-color: var(--primary-color);
-            transition: width 0.5s ease;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <aside class="sidebar">
-            <div class="logo">A</div>
-            <ul class="nav-links">
-                <li><a href="#dashboard" class="active"><i class="fas fa-home"></i><span>Dashboard</span></a></li>
-                <li><a href="#missions"><i class="fas fa-rocket"></i><span>Missions</span></a></li>
-                <li><a href="#satellites"><i class="fas fa-satellite"></i><span>Satellites</span></a></li>
-                <li><a href="#launch-schedule"><i class="fas fa-calendar-alt"></i><span>Launch Schedule</span></a></li>
-                <li><a href="#analytics"><i class="fas fa-chart-line"></i><span>Analytics</span></a></li>
-                <li><a href="#settings"><i class="fas fa-cog"></i><span>Settings</span></a></li>
-            </ul>
-        </aside>
-        <main class="main-content">
-            <div class="dashboard-header">
-                <h1 class="dashboard-title">Mission Control</h1>
-                <div class="date-time" id="date-time"></div>
-            </div>
-            <div class="bento-grid">
-                <div class="bento-item">
-                    <h3>Active Missions</h3>
-                    <p>12</p>
-                    <div class="progress-bar">
-                        <div class="progress-bar-fill" style="width: 75%;"></div>
-                    </div>
-                </div>
-                <div class="bento-item">
-                    <h3>Satellites in Orbit</h3>
-                    <p>247</p>
-                    <div class="status-indicator status-optimal"></div>
-                    <span>All systems operational</span>
-                </div>
-                <div class="bento-item">
-                    <h3>Upcoming Launches</h3>
-                    <p>5</p>
-                    <div id="countdown" style="font-size: 1rem; margin-top: 10px;"></div>
-                </div>
-                <div class="bento-item">
-                    <h3>Mission Success Rate</h3>
-                    <p>98.7%</p>
-                    <div class="status-indicator status-optimal"></div>
-                    <span>Above target</span>
-                </div>
-                <div class="bento-item wide">
-                    <h3>Data Transmitted (Last 30 Days)</h3>
-                    <div class="chart-container">
-                        <canvas id="dataTransmittedChart"></canvas>
-                    </div>
-                </div>
-                <div class="bento-item">
-                    <h3>Collision Risks Mitigated</h3>
-                    <p>17</p>
-                    <div class="status-indicator status-warning"></div>
-                    <span>2 active warnings</span>
-                </div>
-                <div class="bento-item tall">
-                    <h3>Satellite Health Status</h3>
-                    <div class="chart-container">
-                        <canvas id="satelliteHealthChart"></canvas>
-                    </div>
-                </div>
-                <div class="bento-item">
-                    <h3>Ground Station Network</h3>
-                    <p>8 / 8</p>
-                    <div class="status-indicator status-optimal"></div>
-                    <span>All stations online</span>
-                </div>
-                <div class="bento-item wide tall">
-                    <h3>Earth and Satellite Visualization</h3>
-                    <div id="earth-container" class="earth-container"></div>
-                </div>
-            </div>
-        </main>
-    </div>
-    <script>
-        // Date and Time
-        function updateDateTime() {
-            const now = new Date();
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short' };
-            document.getElementById('date-time').textContent = now.toLocaleDateString('en-US', options);
-        }
-        setInterval(updateDateTime, 1000);
-        updateDateTime();
-
-        // Countdown Timer
-        function updateCountdown() {
-            const launchDate = new Date('2023-12-31T00:00:00').getTime();
-            const now = new Date().getTime();
-            const distance = launchDate - now;
-
-            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-            document.getElementById('countdown').textContent = `Next launch: T-${days}d ${hours}h ${minutes}m ${seconds}s`;
-        }
-        setInterval(updateCountdown, 1000);
-        updateCountdown();
-
-        // Data Transmitted Chart
-        const dataTransmittedCtx = document.getElementById('dataTransmittedChart').getContext('2d');
-        new Chart(dataTransmittedCtx, {
-            type: 'line',
-            data: {
-                labels: ['1', '5', '10', '15', '20', '25', '30'],
-                datasets: [{
-                    label: 'Data Transmitted (TB)',
-                    data: [12, 19, 3, 5, 2, 3, 7],
-                    borderColor: '#007AFF',
-                    backgroundColor: 'rgba(0, 122, 255, 0.1)',
-                    tension: 0.4,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: 'rgba(255, 255, 255, 0.1)'
-                        },
-                        ticks: {
-                            color: 'rgba(255, 255, 255, 0.7)'
-                        }
-                    },
-                    x: {
-                        grid: {
-                            color: 'rgba(255, 255, 255, 0.1)'
-                        },
-                        ticks: {
-                            color: 'rgba(255, 255, 255, 0.7)'
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                }
-            }
-        });
-
-        // Satellite Health Chart
-        const satelliteHealthCtx = document.getElementById('satelliteHealthChart').getContext('2d');
-        new Chart(satelliteHealthCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Optimal', 'Good', 'Fair', 'Poor'],
-                datasets: [{
-                    data: [70, 20, 7, 3],
-                    backgroundColor: ['#34C759', '#5AC8FA', '#FF9500', '#FF3B30']
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            color: 'rgba(255, 255, 255, 0.7)'
-                        }
-                    }
-                }
-            }
-        });
-
-        // Earth and Satellite Visualization
-        function createEarthVisualization() {
-            const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
-            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-            renderer.setSize(400, 400);
-            document.getElementById('earth-container').appendChild(renderer.domElement);
-
-            const earthGeometry = new THREE.SphereGeometry(1, 64, 64);
-            const earthMaterial = new THREE.MeshPhongMaterial({
-                map: new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg'),
-                bumpMap: new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/earth_normal_2048.jpg'),
-                bumpScale: 0.05,
-                specularMap: new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/earth_specular_2048.jpg'),
-                specular: new THREE.Color('grey')
-            });
-            const earth = new THREE.Mesh(earthGeometry, earthMaterial);
-            scene.add(earth);
-
-            const satelliteGeometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
-            const satelliteMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-            const satellite = new THREE.Mesh(satelliteGeometry, satelliteMaterial);
-            satellite.position.set(1.5, 0, 0);
-            scene.add(satellite);
-
-            const ambientLight = new THREE.AmbientLight(0x404040);
-            scene.add(ambientLight);
-
-            const pointLight = new THREE.PointLight(0xffffff, 1);
-            pointLight.position.set(5, 3, 5);
-            scene.add(pointLight);
-
-            camera.position.z = 3;
-
-            function animate() {
-                requestAnimationFrame(animate);
-                earth.rotation.y += 0.005;
-                satellite.rotation.y += 0.01;
-                satellite.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), 0.02);
-                renderer.render(scene, camera);
-            }
-            animate();
-        }
-        createEarthVisualization();
-    </script>
-</body>
-</html>
+        .timeline-point {
+            width: 12

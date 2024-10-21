@@ -168,4 +168,194 @@
         }
 
         .timeline-point {
-            width: 12
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+            position: relative;
+        }
+
+        .timeline-point::after {
+            content: attr(data-label);
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+            color: var(--text-color);
+            white-space: nowrap;
+        }
+
+        .timeline-point.active {
+            background-color: var(--primary-color);
+        }
+
+        .health-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .health-bar {
+            height: 8px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .health-bar-fill {
+            height: 100%;
+            background-color: var(--primary-color);
+            transition: width 0.5s ease;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="top-bar">
+            <div class="mission-title">ARTEMIS SMMS</div>
+            <div class="mission-status">MISSION STATUS: NOMINAL</div>
+        </div>
+        <nav class="sidebar">
+            <a href="#" class="nav-item active"><i class="fas fa-home"></i></a>
+            <a href="#" class="nav-item"><i class="fas fa-rocket"></i></a>
+            <a href="#" class="nav-item"><i class="fas fa-satellite"></i></a>
+            <a href="#" class="nav-item"><i class="fas fa-chart-line"></i></a>
+            <a href="#" class="nav-item"><i class="fas fa-cog"></i></a>
+        </nav>
+        <main class="main-content">
+            <div class="panel earth-viz">
+                <h3 class="panel-title">Earth & Satellite Visualization</h3>
+                <div id="earth-container"></div>
+            </div>
+            <div class="panel">
+                <h3 class="panel-title">Active Missions</h3>
+                <div class="panel-content">
+                    <div class="data-value pulse">12</div>
+                    <div class="data-label">Current Active Missions</div>
+                </div>
+            </div>
+            <div class="panel">
+                <h3 class="panel-title">Satellite Network</h3>
+                <div class="panel-content">
+                    <div class="data-value">247</div>
+                    <div class="data-label">Operational Satellites</div>
+                </div>
+            </div>
+            <div class="panel">
+                <h3 class="panel-title">Data Transmission</h3>
+                <div class="panel-content">
+                    <div class="data-value">1.2 PB</div>
+                    <div class="data-label">Data Transmitted Today</div>
+                </div>
+            </div>
+            <div class="panel">
+                <h3 class="panel-title">Next Launch</h3>
+                <div class="panel-content">
+                    <div class="data-value" id="countdown">T-00:00:00</div>
+                    <div class="data-label">Time to Next Launch</div>
+                </div>
+            </div>
+            <div class="panel mission-timeline">
+                <h3 class="panel-title">Mission Timeline</h3>
+                <div class="timeline">
+                    <div class="timeline-point active" data-label="Launch"></div>
+                    <div class="timeline-point active" data-label="Orbit Insertion"></div>
+                    <div class="timeline-point active" data-label="Deployment"></div>
+                    <div class="timeline-point" data-label="Mission Start"></div>
+                    <div class="timeline-point" data-label="Mission Complete"></div>
+                </div>
+            </div>
+            <div class="panel system-health">
+                <h3 class="panel-title">System Health</h3>
+                <div class="health-bars">
+                    <div class="health-bar">
+                        <div class="health-bar-fill" style="width: 95%;"></div>
+                    </div>
+                    <div class="health-bar">
+                        <div class="health-bar-fill" style="width: 88%;"></div>
+                    </div>
+                    <div class="health-bar">
+                        <div class="health-bar-fill" style="width: 92%;"></div>
+                    </div>
+                    <div class="health-bar">
+                        <div class="health-bar-fill" style="width: 97%;"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script>
+        // Earth Visualization
+        function createEarthVisualization() {
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(500, 500);
+            document.getElementById('earth-container').appendChild(renderer.domElement);
+
+            const earthGeometry = new THREE.SphereGeometry(1, 64, 64);
+            const earthMaterial = new THREE.MeshPhongMaterial({
+                map: new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg'),
+                bumpMap: new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/earth_normal_2048.jpg'),
+                bumpScale: 0.05,
+                specularMap: new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/earth_specular_2048.jpg'),
+                specular: new THREE.Color('grey')
+            });
+            const earth = new THREE.Mesh(earthGeometry, earthMaterial);
+            scene.add(earth);
+
+            const satelliteGeometry = new THREE.BoxGeometry(0.05, 0.05, 0.05);
+            const satelliteMaterial = new THREE.MeshBasicMaterial({ color: 0x00FFFF });
+            const satellite = new THREE.Mesh(satelliteGeometry, satelliteMaterial);
+            satellite.position.set(1.5, 0, 0);
+            scene.add(satellite);
+
+            const ambientLight = new THREE.AmbientLight(0x404040);
+            scene.add(ambientLight);
+
+            const pointLight = new THREE.PointLight(0xffffff, 1);
+            pointLight.position.set(5, 3, 5);
+            scene.add(pointLight);
+
+            camera.position.z = 3;
+
+            function animate() {
+                requestAnimationFrame(animate);
+                earth.rotation.y += 0.002;
+                satellite.rotation.y += 0.01;
+                satellite.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), 0.01);
+                renderer.render(scene, camera);
+            }
+            animate();
+        }
+        createEarthVisualization();
+
+        // Countdown Timer
+        function updateCountdown() {
+            const launchDate = new Date('2023-12-31T00:00:00').getTime();
+            const now = new Date().getTime();
+            const distance = launchDate - now;
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById('countdown').textContent = `T-${days}d ${hours}h ${minutes}m ${seconds}s`;
+        }
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+    </script>
+</body>
+</html>

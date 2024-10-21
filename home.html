@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artemis SMMS - Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #0a192f;
+            color: #e6f1ff;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #172a45;
+            padding: 2rem;
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: #64ffda;
+            margin-bottom: 2rem;
+        }
+
+        .nav-links {
+            list-style-type: none;
+        }
+
+        .nav-links li {
+            margin-bottom: 1rem;
+        }
+
+        .nav-links a {
+            color: #8892b0;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #64ffda;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .dashboard-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: #ccd6f6;
+        }
+
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .bento-item {
+            background-color: #1d3557;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .bento-item h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: #64ffda;
+        }
+
+        .bento-item p {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ccd6f6;
+        }
+
+        .bento-item.wide {
+            grid-column: span 2;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                padding: 1rem;
+            }
+
+            .bento-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .bento-item.wide {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo">Artemis SMMS</div>
+            <ul class="nav-links">
+                <li><a href="#dashboard">Dashboard</a></li>
+                <li><a href="#missions">Missions</a></li>
+                <li><a href="#satellites">Satellites</a></li>
+                <li><a href="#launch-schedule">Launch Schedule</a></li>
+                <li><a href="#analytics">Analytics</a></li>
+                <li><a href="#settings">Settings</a></li>
+            </ul>
+        </aside>
+        <main class="main-content">
+            <h1 class="dashboard-title">Mission Control Dashboard</h1>
+            <div class="bento-grid">
+                <div class="bento-item">
+                    <h3>Active Missions</h3>
+                    <p>12</p>
+                </div>
+                <div class="bento-item">
+                    <h3>Satellites in Orbit</h3>
+                    <p>247</p>
+                </div>
+                <div class="bento-item">
+                    <h3>Upcoming Launches</h3>
+                    <p>5</p>
+                </div>
+                <div class="bento-item wide">
+                    <h3>Mission Success Rate</h3>
+                    <p>98.7%</p>
+                </div>
+                <div class="bento-item">
+                    <h3>Data Transmitted</h3>
+                    <p>1.2 PB</p>
+                </div>
+                <div class="bento-item">
+                    <h3>Collision Risks Mitigated</h3>
+                    <p>17</p>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

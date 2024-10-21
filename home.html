@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Artemis SMMS - Mission Control Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <title>Artemis SMMS - Advanced Mission Control Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -16,21 +17,16 @@
         body {
             font-family: 'Roboto', sans-serif;
             background-color: #000;
-            color: #FFFFFF;
+            color: #E0E7FF;
             overflow: hidden;
-            background-image: url("https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2072&q=80");
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
         }
 
-        .overlay {
+        .stars-bg {
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.7);
+            width: 100%;
+            height: 100%;
             z-index: -1;
         }
 
@@ -40,44 +36,79 @@
         }
 
         .sidebar {
-            width: 250px;
-            background-color: rgba(0, 0, 0, 0.8);
+            width: 280px;
+            background-color: rgba(13, 18, 30, 0.8);
             padding: 2rem;
             backdrop-filter: blur(10px);
-            border-right: 1px solid rgba(77, 208, 225, 0.3);
+            border-right: 1px solid rgba(99, 179, 237, 0.3);
+            display: flex;
+            flex-direction: column;
         }
 
         .logo {
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.5rem;
-            color: #4DD0E1;
-            margin-bottom: 2rem;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #63B3ED;
+            margin-bottom: 3rem;
+            text-align: center;
         }
 
         .nav-links {
             list-style-type: none;
+            flex-grow: 1;
         }
 
         .nav-links li {
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         .nav-links a {
-            color: #B0BEC5;
+            color: #A0AEC0;
             text-decoration: none;
-            font-size: 1rem;
-            transition: color 0.3s ease;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
         }
 
-        .nav-links a:hover {
-            color: #4DD0E1;
+        .nav-links a:hover, .nav-links a.active {
+            color: #63B3ED;
+            background-color: rgba(99, 179, 237, 0.1);
         }
 
         .nav-links a i {
-            margin-right: 10px;
-            font-size: 1.2rem;
+            margin-right: 12px;
+            font-size: 1.3rem;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(99, 179, 237, 0.3);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 12px;
+        }
+
+        .user-info {
+            font-size: 0.9rem;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: #E0E7FF;
+        }
+
+        .user-role {
+            color: #A0AEC0;
         }
 
         .main-content {
@@ -86,11 +117,23 @@
             overflow-y: auto;
         }
 
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
         .dashboard-title {
             font-family: 'Orbitron', sans-serif;
-            font-size: 2rem;
-            margin-bottom: 2rem;
-            color: #4DD0E1;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #63B3ED;
+        }
+
+        .date-time {
+            font-size: 1.1rem;
+            color: #A0AEC0;
         }
 
         .bento-grid {
@@ -100,31 +143,32 @@
         }
 
         .bento-item {
-            background-color: rgba(0, 0, 0, 0.6);
-            border-radius: 10px;
+            background-color: rgba(23, 25, 35, 0.8);
+            border-radius: 12px;
             padding: 1.5rem;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(77, 208, 225, 0.3);
+            border: 1px solid rgba(99, 179, 237, 0.3);
             transition: all 0.3s ease;
         }
 
         .bento-item:hover {
             transform: translateY(-5px);
-            box-shadow: 0 6px 12px rgba(77, 208, 225, 0.2);
+            box-shadow: 0 8px 15px rgba(99, 179, 237, 0.2);
         }
 
         .bento-item h3 {
             font-family: 'Orbitron', sans-serif;
             font-size: 1.2rem;
+            font-weight: 600;
             margin-bottom: 1rem;
-            color: #4DD0E1;
+            color: #63B3ED;
         }
 
         .bento-item p {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #FFFFFF;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #E0E7FF;
         }
 
         .bento-item.wide {
@@ -140,19 +184,25 @@
             height: 200px;
         }
 
-        @media (max-width: 1200px) {
+        .earth-container {
+            width: 100%;
+            height: 100%;
+            min-height: 300px;
+        }
+
+        @media (max-width: 1400px) {
             .bento-grid {
                 grid-template-columns: repeat(3, 1fr);
             }
         }
 
-        @media (max-width: 992px) {
+        @media (max-width: 1200px) {
             .bento-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 992px) {
             .container {
                 flex-direction: column;
             }
@@ -174,21 +224,31 @@
     </style>
 </head>
 <body>
-    <div class="overlay"></div>
+    <div id="stars-bg" class="stars-bg"></div>
     <div class="container">
         <aside class="sidebar">
             <div class="logo">Artemis SMMS</div>
             <ul class="nav-links">
-                <li><a href="#dashboard"><i>🏠</i> Dashboard</a></li>
+                <li><a href="#dashboard" class="active"><i>🏠</i> Dashboard</a></li>
                 <li><a href="#missions"><i>🚀</i> Missions</a></li>
                 <li><a href="#satellites"><i>🛰️</i> Satellites</a></li>
                 <li><a href="#launch-schedule"><i>📅</i> Launch Schedule</a></li>
                 <li><a href="#analytics"><i>📊</i> Analytics</a></li>
                 <li><a href="#settings"><i>⚙️</i> Settings</a></li>
             </ul>
+            <div class="user-profile">
+                <img src="https://i.pravatar.cc/150?img=12" alt="User Avatar" class="user-avatar">
+                <div class="user-info">
+                    <div class="user-name">Dr. Jane Smith</div>
+                    <div class="user-role">Mission Director</div>
+                </div>
+            </div>
         </aside>
         <main class="main-content">
-            <h1 class="dashboard-title">Mission Control Dashboard</h1>
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">Mission Control Dashboard</h1>
+                <div class="date-time" id="date-time"></div>
+            </div>
             <div class="bento-grid">
                 <div class="bento-item">
                     <h3>Active Missions</h3>
@@ -224,16 +284,79 @@
                 </div>
                 <div class="bento-item">
                     <h3>Next Launch</h3>
-                    <p>T-3d 7h 22m</p>
+                    <p id="countdown">T-00:00:00</p>
                 </div>
                 <div class="bento-item">
                     <h3>Active Ground Stations</h3>
                     <p>8</p>
                 </div>
+                <div class="bento-item wide tall">
+                    <h3>Earth and Satellite Visualization</h3>
+                    <div id="earth-container" class="earth-container"></div>
+                </div>
             </div>
         </main>
     </div>
     <script>
+        // Stars background
+        function createStars() {
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.getElementById('stars-bg').appendChild(renderer.domElement);
+
+            const starGeometry = new THREE.BufferGeometry();
+            const starMaterial = new THREE.PointsMaterial({color: 0xFFFFFF});
+
+            const starVertices = [];
+            for (let i = 0; i < 10000; i++) {
+                const x = (Math.random() - 0.5) * 2000;
+                const y = (Math.random() - 0.5) * 2000;
+                const z = -Math.random() * 2000;
+                starVertices.push(x, y, z);
+            }
+
+            starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+            const stars = new THREE.Points(starGeometry, starMaterial);
+            scene.add(stars);
+
+            camera.position.z = 1;
+
+            function animate() {
+                requestAnimationFrame(animate);
+                stars.rotation.y += 0.0002;
+                renderer.render(scene, camera);
+            }
+            animate();
+        }
+        createStars();
+
+        // Date and Time
+        function updateDateTime() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short' };
+            document.getElementById('date-time').textContent = now.toLocaleDateString('en-US', options);
+        }
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+
+        // Countdown Timer
+        function updateCountdown() {
+            const launchDate = new Date('2023-12-31T00:00:00').getTime();
+            const now = new Date().getTime();
+            const distance = launchDate - now;
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById('countdown').textContent = `T-${days}d ${hours}h ${minutes}m ${seconds}s`;
+        }
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
         // Data Transmitted Chart
         const dataTransmittedCtx = document.getElementById('dataTransmittedChart').getContext('2d');
         new Chart(dataTransmittedCtx, {
@@ -243,8 +366,10 @@
                 datasets: [{
                     label: 'Data Transmitted (TB)',
                     data: [12, 19, 3, 5, 2, 3, 7],
-                    borderColor: '#4DD0E1',
-                    tension: 0.1
+                    borderColor: '#63B3ED',
+                    backgroundColor: 'rgba(99, 179, 237, 0.2)',
+                    tension: 0.4,
+                    fill: true
                 }]
             },
             options: {
@@ -252,7 +377,20 @@
                 maintainAspectRatio: false,
                 scales: {
                     y: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
                     }
                 }
             }
@@ -266,14 +404,56 @@
                 labels: ['Optimal', 'Good', 'Fair', 'Poor'],
                 datasets: [{
                     data: [70, 20, 7, 3],
-                    backgroundColor: ['#4DD0E1', '#45A29E', '#66FCF1', '#C5C6C7']
+                    backgroundColor: ['#63B3ED', '#4FD1C5', '#F6AD55', '#FC8181']
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#E0E7FF'
+                        }
+                    }
+                }
             }
         });
+
+        // Earth and Satellite Visualization
+        function createEarthVisualization() {
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ alpha: true });
+            renderer.setSize(400, 400);
+            document.getElementById('earth-container').appendChild(renderer.domElement);
+
+            const earthGeometry = new THREE.SphereGeometry(1, 32, 32);
+            const earthMaterial = new THREE.MeshBasicMaterial({
+                map: new THREE.TextureLoader().load('https://threejs.org/examples/textures/land_ocean_ice_cloud_2048.jpg')
+            });
+            const earth = new THREE.Mesh(earthGeometry, earthMaterial);
+            scene.add(earth);
+
+            const satelliteGeometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
+            const satelliteMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+            const satellite = new THREE.Mesh(satelliteGeometry, satelliteMaterial);
+            satellite.position.set(1.5, 0, 0);
+            scene.add(satellite);
+
+            camera.position.z = 3;
+
+            function animate() {
+                requestAnimationFrame(animate);
+                earth.rotation.y += 0.005;
+                satellite.rotation.y += 0.01;
+                satellite.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), 0.02);
+                renderer.render(scene, camera);
+            }
+            animate();
+        }
+        createEarthVisualization();
     </script>
 </body>
 </html>

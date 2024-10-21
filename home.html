@@ -3,20 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Artemis SMMS - Advanced Mission Control Interface</title>
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <title>Artemis SMMS - Mission Control</title>
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.11.0/dist/tf.min.js"></script>
     <style>
         :root {
-            --primary-color: #00ffd5;
-            --secondary-color: #ff00a0;
-            --background-color: #000814;
-            --surface-color: #001440;
-            --text-color: #e0ffff;
-            --accent-color: #ffd700;
+            --background-color: #f5f5f7;
+            --surface-color: #ffffff;
+            --text-color: #1d1d1f;
+            --primary-color: #0071e3;
+            --secondary-color: #86868b;
+            --accent-color: #fa5252;
         }
 
         * {
@@ -26,118 +24,108 @@
         }
 
         body {
-            font-family: 'Rajdhani', sans-serif;
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--background-color);
             color: var(--text-color);
-            overflow: hidden;
+            line-height: 1.47059;
+            font-weight: 400;
+            letter-spacing: -0.022em;
         }
 
         .container {
             display: grid;
-            grid-template-columns: 80px 1fr 300px;
-            grid-template-rows: 60px 1fr;
+            grid-template-columns: 220px 1fr;
             height: 100vh;
         }
 
-        .top-bar {
-            grid-column: 1 / -1;
-            background-color: rgba(0, 20, 64, 0.8);
-            backdrop-filter: blur(10px);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            z-index: 1000;
+        .sidebar {
+            background-color: var(--surface-color);
+            padding: 20px;
+            border-right: 1px solid #d2d2d7;
         }
 
-        .mission-title {
-            font-size: 1.4rem;
-            font-weight: 700;
+        .logo {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 30px;
             color: var(--primary-color);
         }
 
-        .mission-status {
-            font-size: 1rem;
-            color: var(--accent-color);
-        }
-
-        .sidebar {
-            background-color: rgba(0, 20, 64, 0.6);
-            backdrop-filter: blur(10px);
-            padding: 20px 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transition: all 0.3s ease;
-        }
-
         .nav-item {
-            width: 100%;
-            padding: 15px 0;
             display: flex;
-            justify-content: center;
             align-items: center;
+            padding: 10px 15px;
+            margin-bottom: 5px;
+            border-radius: 8px;
             color: var(--text-color);
             text-decoration: none;
-            transition: all 0.3s ease;
+            transition: background-color 0.2s ease;
         }
 
         .nav-item:hover, .nav-item.active {
-            background-color: rgba(0, 255, 213, 0.1);
+            background-color: #f5f5f7;
         }
 
         .nav-item i {
-            font-size: 1.5rem;
+            margin-right: 10px;
+            font-size: 18px;
         }
 
         .main-content {
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .dashboard-title {
+            font-size: 32px;
+            font-weight: 600;
+        }
+
+        .date-time {
+            font-size: 15px;
+            color: var(--secondary-color);
+        }
+
+        .grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, 1fr);
             gap: 20px;
-            padding: 20px;
-            overflow-y: auto;
         }
 
         .panel {
             background-color: var(--surface-color);
-            border-radius: 10px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 4px 6px rgba(0, 255, 213, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .panel:hover {
-            box-shadow: 0 8px 12px rgba(0, 255, 213, 0.2);
-            transform: translateY(-5px);
+            border-radius: 18px;
+            padding: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .panel-title {
-            font-size: 1.1rem;
+            font-size: 17px;
             font-weight: 600;
-            color: var(--primary-color);
             margin-bottom: 15px;
+            color: var(--secondary-color);
         }
 
         .panel-content {
-            flex-grow: 1;
             display: flex;
             flex-direction: column;
-            justify-content: center;
         }
 
         .data-value {
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 2.2rem;
+            font-size: 36px;
             font-weight: 700;
-            color: var(--text-color);
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
 
         .data-label {
-            font-size: 1rem;
+            font-size: 14px;
             color: var(--secondary-color);
         }
 
@@ -148,251 +136,107 @@
 
         #earth-container {
             width: 100%;
-            height: 100%;
+            height: 400px;
         }
 
-        .mission-timeline {
-            grid-column: span 3;
+        .chart-container {
+            width: 100%;
+            height: 200px;
         }
 
-        .timeline {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 4px;
-            background-color: rgba(255, 255, 255, 0.1);
-            position: relative;
-            margin-top: 20px;
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
-        .timeline-point {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background-color: var(--surface-color);
-            border: 2px solid var(--text-color);
-            position: relative;
-            z-index: 1;
-        }
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
 
-        .timeline-point.active {
-            background-color: var(--primary-color);
-        }
-
-        .timeline-point::after {
-            content: attr(data-label);
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.8rem;
-            white-space: nowrap;
-        }
-
-        .system-health {
-            grid-column: span 2;
-        }
-
-        .health-bars {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .health-bar {
-            height: 8px;
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .health-bar-fill {
-            height: 100%;
-            background-color: var(--primary-color);
-            transition: width 0.5s ease;
-        }
-
-        .right-sidebar {
-            background-color: rgba(0, 20, 64, 0.6);
-            backdrop-filter: blur(10px);
-            padding: 20px;
-            overflow-y: auto;
-        }
-
-        .alerts {
-            margin-bottom: 20px;
-        }
-
-        .alert-item {
-            background-color: rgba(255, 0, 0, 0.1);
-            border-left: 4px solid #ff0000;
-            padding: 10px;
-            margin-bottom: 10px;
-            font-size: 0.9rem;
-        }
-
-        .telemetry {
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.8rem;
-        }
-
-        .telemetry-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        .pulse {
-            animation: pulse 2s infinite;
-        }
-
-        #ai-assistant {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: var(--surface-color);
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0, 255, 213, 0.2);
-            transition: all 0.3s ease;
-        }
-
-        #ai-assistant:hover {
-            transform: scale(1.1);
-        }
-
-        #ai-assistant i {
-            font-size: 24px;
-            color: var(--primary-color);
+            .earth-viz {
+                grid-column: span 1;
+                grid-row: span 1;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="top-bar">
-            <div class="mission-title">ARTEMIS SMMS</div>
-            <div class="mission-status">MISSION STATUS: NOMINAL</div>
-        </div>
-        <nav class="sidebar">
-            <a href="#" class="nav-item active"><i class="fas fa-home"></i></a>
-            <a href="#" class="nav-item"><i class="fas fa-rocket"></i></a>
-            <a href="#" class="nav-item"><i class="fas fa-satellite"></i></a>
-            <a href="#" class="nav-item"><i class="fas fa-chart-line"></i></a>
-            <a href="#" class="nav-item"><i class="fas fa-cog"></i></a>
-        </nav>
+        <aside class="sidebar">
+            <div class="logo">Artemis SMMS</div>
+            <nav>
+                <a href="#" class="nav-item active"><i class="fas fa-home"></i>Dashboard</a>
+                <a href="#" class="nav-item"><i class="fas fa-rocket"></i>Missions</a>
+                <a href="#" class="nav-item"><i class="fas fa-satellite"></i>Satellites</a>
+                <a href="#" class="nav-item"><i class="fas fa-chart-line"></i>Analytics</a>
+                <a href="#" class="nav-item"><i class="fas fa-cog"></i>Settings</a>
+            </nav>
+        </aside>
         <main class="main-content">
-            <div class="panel earth-viz">
-                <h3 class="panel-title">Earth & Satellite Visualization</h3>
-                <div id="earth-container"></div>
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">Mission Control</h1>
+                <div class="date-time" id="date-time"></div>
             </div>
-            <div class="panel">
-                <h3 class="panel-title">Active Missions</h3>
-                <div class="panel-content">
-                    <div class="data-value pulse">12</div>
-                    <div class="data-label">Current Active Missions</div>
+            <div class="grid">
+                <div class="panel earth-viz">
+                    <h3 class="panel-title">Earth & Satellite Visualization</h3>
+                    <div id="earth-container"></div>
                 </div>
-            </div>
-            <div class="panel">
-                <h3 class="panel-title">Satellite Network</h3>
-                <div class="panel-content">
-                    <div class="data-value">247</div>
-                    <div class="data-label">Operational Satellites</div>
-                </div>
-            </div>
-            <div class="panel">
-                <h3 class="panel-title">Data Transmission</h3>
-                <div class="panel-content">
-                    <div class="data-value">1.2 PB</div>
-                    <div class="data-label">Data Transmitted Today</div>
-                </div>
-            </div>
-            <div class="panel">
-                <h3 class="panel-title">Next Launch</h3>
-                <div class="panel-content">
-                    <div class="data-value" id="countdown">T-00:00:00</div>
-                    <div class="data-label">Time to Next Launch</div>
-                </div>
-            </div>
-            <div class="panel mission-timeline">
-                <h3 class="panel-title">Mission Timeline</h3>
-                <div class="timeline">
-                    <div class="timeline-point active" data-label="Launch"></div>
-                    <div class="timeline-point active" data-label="Orbit Insertion"></div>
-                    <div class="timeline-point active" data-label="Deployment"></div>
-                    <div class="timeline-point" data-label="Mission Start"></div>
-                    <div class="timeline-point" data-label="Mission Complete"></div>
-                </div>
-            </div>
-            <div class="panel system-health">
-                <h3 class="panel-title">System Health</h3>
-                <div class="health-bars">
-                    <div class="health-bar">
-                        <div class="health-bar-fill" style="width: 95%;"></div>
+                <div class="panel">
+                    <h3 class="panel-title">Active Missions</h3>
+                    <div class="panel-content">
+                        <div class="data-value">12</div>
+                        <div class="data-label">Current Active Missions</div>
                     </div>
-                    <div class="health-bar">
-                        <div class="health-bar-fill" style="width: 88%;"></div>
+                </div>
+                <div class="panel">
+                    <h3 class="panel-title">Satellite Network</h3>
+                    <div class="panel-content">
+                        <div class="data-value">247</div>
+                        <div class="data-label">Operational Satellites</div>
                     </div>
-                    <div class="health-bar">
-                        <div class="health-bar-fill" style="width: 92%;"></div>
+                </div>
+                <div class="panel">
+                    <h3 class="panel-title">Data Transmission</h3>
+                    <div class="panel-content">
+                        <div class="data-value">1.2 PB</div>
+                        <div class="data-label">Data Transmitted Today</div>
                     </div>
-                    <div class="health-bar">
-                        <div class="health-bar-fill" style="width: 97%;"></div>
+                </div>
+                <div class="panel">
+                    <h3 class="panel-title">Next Launch</h3>
+                    <div class="panel-content">
+                        <div class="data-value" id="countdown">T-00:00:00</div>
+                        <div class="data-label">Time to Next Launch</div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <h3 class="panel-title">System Health</h3>
+                    <div class="chart-container">
+                        <canvas id="systemHealthChart"></canvas>
                     </div>
                 </div>
             </div>
         </main>
-        <aside class="right-sidebar">
-            <div class="alerts">
-                <h3 class="panel-title">Alerts</h3>
-                <div class="alert-item">
-                    Warning: Increased solar activity detected
-                </div>
-                <div class="alert-item">
-                    Notice: Scheduled maintenance for Satellite A-127
-                </div>
-            </div>
-            <div class="telemetry">
-                <h3 class="panel-title">Real-time Telemetry</h3>
-                <div class="telemetry-item">
-                    <span>Altitude:</span>
-                    <span>408.2 km</span>
-                </div>
-                <div class="telemetry-item">
-                    <span>Velocity:</span>
-                    <span>7.66 km/s</span>
-                </div>
-                <div class="telemetry-item">
-                    <span>Temperature:</span>
-                    <span>-15.3°C</span>
-                </div>
-                <div class="telemetry-item">
-                    <span>Power:</span>
-                    <span>4.2 kW</span>
-                </div>
-            </div>
-        </aside>
     </div>
-    <div id="ai-assistant">
-        <i class="fas fa-robot"></i>
-    </div>
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
     <script>
         // Earth Visualization
         function createEarthVisualization() {
             const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+            const camera = new THREE.PerspectiveCamera(75, 2, 0.1, 1000);
             const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            renderer.setSize(500, 500);
+            renderer.setSize(800, 400);
             document.getElementById('earth-container').appendChild(renderer.domElement);
 
             const earthGeometry = new THREE.SphereGeometry(1, 64, 64);
@@ -407,7 +251,7 @@
             scene.add(earth);
 
             const satelliteGeometry = new THREE.BoxGeometry(0.05, 0.05, 0.05);
-            const satelliteMaterial = new THREE.MeshBasicMaterial({ color: 0x00ffd5 });
+            const satelliteMaterial = new THREE.MeshBasicMaterial({ color: 0x0071e3 });
             const satellite = new THREE.Mesh(satelliteGeometry, satelliteMaterial);
             satellite.position.set(1.5, 0, 0);
             scene.add(satellite);
@@ -432,6 +276,15 @@
         }
         createEarthVisualization();
 
+        // Date and Time
+        function updateDateTime() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            document.getElementById('date-time').textContent = now.toLocaleDateString('en-US', options);
+        }
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+
         // Countdown Timer
         function updateCountdown() {
             const launchDate = new Date('2023-12-31T00:00:00').getTime();
@@ -448,20 +301,35 @@
         setInterval(updateCountdown, 1000);
         updateCountdown();
 
-        // AI Assistant
-        document.getElementById('ai-assistant').addEventListener('click', function() {
-            alert('AI Assistant activated. How can I help you with mission control?');
+        // System Health Chart
+        const ctx = document.getElementById('systemHealthChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Optimal', 'Good', 'Fair', 'Poor'],
+                datasets: [{
+                    data: [70, 20, 7, 3],
+                    backgroundColor: ['#34C759', '#5AC8FA', '#FF9500', '#FF3B30'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: {
+                                family: "'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif",
+                                size: 12
+                            }
+                        }
+                    }
+                }
+            }
         });
-
-        // Simulated real-time data updates
-        function updateTelemetry() {
-            const telemetryItems = document.querySelectorAll('.telemetry-item span:last-child');
-            telemetryItems[0].textContent = `${(408 + Math.random() * 0.5).toFixed(1)} km`;
-            telemetryItems[1].textContent = `${(7.66 + Math.random() * 0.02).toFixed(2)} km/s`;
-            telemetryItems[2].textContent = `${(-15 + Math.random() * 1).toFixed(1)}°C`;
-            telemetryItems[3].textContent = `${(4.2 + Math.random() * 0.2).toFixed(1)} kW`;
-        }
-        setInterval(updateTelemetry, 2000);
     </script>
 </body>
 </html>

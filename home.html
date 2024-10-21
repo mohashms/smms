@@ -4,17 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Artemis SMMS - Mission Control</title>
-    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --background-color: #000;
-            --surface-color: #ffffff;
-            --text-color: #1d1d1f;
-            --primary-color: #0071e3;
-            --secondary-color: #86868b;
-            --accent-color: #fa5252;
+            --background-color: #0a0e17;
+            --surface-color: rgba(255, 255, 255, 0.05);
+            --text-color: #ffffff;
+            --primary-color: #64ffda;
+            --secondary-color: #8892b0;
+            --accent-color: #ff79c6;
         }
 
         * {
@@ -24,28 +24,32 @@
         }
 
         body {
-            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Inter', sans-serif;
             background-color: var(--background-color);
             color: var(--text-color);
-            line-height: 1.47059;
-            font-weight: 400;
-            letter-spacing: -0.022em;
+            line-height: 1.5;
+            background-image: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2072&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
         }
 
         .container {
             display: grid;
             grid-template-columns: 220px 1fr;
-            height: 100vh;
+            min-height: 100vh;
+            backdrop-filter: blur(10px);
         }
 
         .sidebar {
             background-color: var(--surface-color);
             padding: 20px;
-            border-right: 1px solid #d2d2d7;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
         }
 
         .logo {
-            font-size: 20px;
+            font-size: 24px;
             font-weight: 600;
             margin-bottom: 30px;
             color: var(--primary-color);
@@ -63,7 +67,7 @@
         }
 
         .nav-item:hover, .nav-item.active {
-            background-color: #f5f5f7;
+            background-color: rgba(255, 255, 255, 0.1);
         }
 
         .nav-item i {
@@ -104,6 +108,8 @@
             border-radius: 18px;
             padding: 24px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .panel-title {
@@ -122,6 +128,7 @@
             font-size: 36px;
             font-weight: 700;
             margin-bottom: 5px;
+            color: var(--primary-color);
         }
 
         .data-label {
@@ -251,7 +258,7 @@
             scene.add(earth);
 
             const satelliteGeometry = new THREE.BoxGeometry(0.05, 0.05, 0.05);
-            const satelliteMaterial = new THREE.MeshBasicMaterial({ color: 0x0071e3 });
+            const satelliteMaterial = new THREE.MeshBasicMaterial({ color: 0x64ffda });
             const satellite = new THREE.Mesh(satelliteGeometry, satelliteMaterial);
             satellite.position.set(1.5, 0, 0);
             scene.add(satellite);
@@ -309,7 +316,7 @@
                 labels: ['Optimal', 'Good', 'Fair', 'Poor'],
                 datasets: [{
                     data: [70, 20, 7, 3],
-                    backgroundColor: ['#34C759', '#5AC8FA', '#FF9500', '#FF3B30'],
+                    backgroundColor: ['#64ffda', '#64b5f6', '#ffeb3b', '#ff8a65'],
                     borderWidth: 0
                 }]
             },
@@ -321,8 +328,9 @@
                     legend: {
                         position: 'bottom',
                         labels: {
+                            color: '#8892b0',
                             font: {
-                                family: "'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif",
+                                family: "'Inter', sans-serif",
                                 size: 12
                             }
                         }

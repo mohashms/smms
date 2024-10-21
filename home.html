@@ -3,18 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Artemis SMMS - Mission Control Interface</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;700&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <title>Artemis SMMS - Advanced Mission Control Interface</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.11.0/dist/tf.min.js"></script>
     <style>
         :root {
-            --primary-color: #00FFFF;
-            --secondary-color: #FF4081;
-            --background-color: #000B14;
-            --surface-color: #001F3F;
-            --text-color: #E0F7FA;
-            --accent-color: #FFC400;
+            --primary-color: #00ffd5;
+            --secondary-color: #ff00a0;
+            --background-color: #000814;
+            --surface-color: #001440;
+            --text-color: #e0ffff;
+            --accent-color: #ffd700;
         }
 
         * {
@@ -24,7 +26,7 @@
         }
 
         body {
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'Rajdhani', sans-serif;
             background-color: var(--background-color);
             color: var(--text-color);
             overflow: hidden;
@@ -32,14 +34,14 @@
 
         .container {
             display: grid;
-            grid-template-columns: 80px 1fr;
+            grid-template-columns: 80px 1fr 300px;
             grid-template-rows: 60px 1fr;
             height: 100vh;
         }
 
         .top-bar {
             grid-column: 1 / -1;
-            background-color: rgba(0, 31, 63, 0.8);
+            background-color: rgba(0, 20, 64, 0.8);
             backdrop-filter: blur(10px);
             display: flex;
             justify-content: space-between;
@@ -49,18 +51,18 @@
         }
 
         .mission-title {
-            font-size: 1.2rem;
+            font-size: 1.4rem;
             font-weight: 700;
             color: var(--primary-color);
         }
 
         .mission-status {
-            font-size: 0.9rem;
+            font-size: 1rem;
             color: var(--accent-color);
         }
 
         .sidebar {
-            background-color: rgba(0, 31, 63, 0.6);
+            background-color: rgba(0, 20, 64, 0.6);
             backdrop-filter: blur(10px);
             padding: 20px 0;
             display: flex;
@@ -81,7 +83,7 @@
         }
 
         .nav-item:hover, .nav-item.active {
-            background-color: rgba(0, 255, 255, 0.1);
+            background-color: rgba(0, 255, 213, 0.1);
         }
 
         .nav-item i {
@@ -90,7 +92,7 @@
 
         .main-content {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(3, 1fr);
             gap: 20px;
             padding: 20px;
@@ -103,18 +105,18 @@
             padding: 20px;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 4px 6px rgba(0, 255, 255, 0.1);
+            box-shadow: 0 4px 6px rgba(0, 255, 213, 0.1);
             transition: all 0.3s ease;
         }
 
         .panel:hover {
-            box-shadow: 0 8px 12px rgba(0, 255, 255, 0.2);
+            box-shadow: 0 8px 12px rgba(0, 255, 213, 0.2);
             transform: translateY(-5px);
         }
 
         .panel-title {
-            font-size: 1rem;
-            font-weight: 500;
+            font-size: 1.1rem;
+            font-weight: 600;
             color: var(--primary-color);
             margin-bottom: 15px;
         }
@@ -127,15 +129,15 @@
         }
 
         .data-value {
-            font-family: 'Roboto Mono', monospace;
-            font-size: 2rem;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 2.2rem;
             font-weight: 700;
             color: var(--text-color);
             margin-bottom: 10px;
         }
 
         .data-label {
-            font-size: 0.9rem;
+            font-size: 1rem;
             color: var(--secondary-color);
         }
 
@@ -144,17 +146,13 @@
             grid-row: span 2;
         }
 
-        .mission-timeline {
-            grid-column: span 2;
-        }
-
-        .system-health {
-            grid-column: span 2;
-        }
-
         #earth-container {
             width: 100%;
             height: 100%;
+        }
+
+        .mission-timeline {
+            grid-column: span 3;
         }
 
         .timeline {
@@ -171,8 +169,14 @@
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            background-color: var(--accent-color);
+            background-color: var(--surface-color);
+            border: 2px solid var(--text-color);
             position: relative;
+            z-index: 1;
+        }
+
+        .timeline-point.active {
+            background-color: var(--primary-color);
         }
 
         .timeline-point::after {
@@ -182,12 +186,11 @@
             left: 50%;
             transform: translateX(-50%);
             font-size: 0.8rem;
-            color: var(--text-color);
             white-space: nowrap;
         }
 
-        .timeline-point.active {
-            background-color: var(--primary-color);
+        .system-health {
+            grid-column: span 2;
         }
 
         .health-bars {
@@ -209,6 +212,36 @@
             transition: width 0.5s ease;
         }
 
+        .right-sidebar {
+            background-color: rgba(0, 20, 64, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .alerts {
+            margin-bottom: 20px;
+        }
+
+        .alert-item {
+            background-color: rgba(255, 0, 0, 0.1);
+            border-left: 4px solid #ff0000;
+            padding: 10px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .telemetry {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8rem;
+        }
+
+        .telemetry-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
@@ -217,6 +250,31 @@
 
         .pulse {
             animation: pulse 2s infinite;
+        }
+
+        #ai-assistant {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--surface-color);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 255, 213, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        #ai-assistant:hover {
+            transform: scale(1.1);
+        }
+
+        #ai-assistant i {
+            font-size: 24px;
+            color: var(--primary-color);
         }
     </style>
 </head>
@@ -294,6 +352,39 @@
                 </div>
             </div>
         </main>
+        <aside class="right-sidebar">
+            <div class="alerts">
+                <h3 class="panel-title">Alerts</h3>
+                <div class="alert-item">
+                    Warning: Increased solar activity detected
+                </div>
+                <div class="alert-item">
+                    Notice: Scheduled maintenance for Satellite A-127
+                </div>
+            </div>
+            <div class="telemetry">
+                <h3 class="panel-title">Real-time Telemetry</h3>
+                <div class="telemetry-item">
+                    <span>Altitude:</span>
+                    <span>408.2 km</span>
+                </div>
+                <div class="telemetry-item">
+                    <span>Velocity:</span>
+                    <span>7.66 km/s</span>
+                </div>
+                <div class="telemetry-item">
+                    <span>Temperature:</span>
+                    <span>-15.3°C</span>
+                </div>
+                <div class="telemetry-item">
+                    <span>Power:</span>
+                    <span>4.2 kW</span>
+                </div>
+            </div>
+        </aside>
+    </div>
+    <div id="ai-assistant">
+        <i class="fas fa-robot"></i>
     </div>
     <script>
         // Earth Visualization
@@ -316,7 +407,7 @@
             scene.add(earth);
 
             const satelliteGeometry = new THREE.BoxGeometry(0.05, 0.05, 0.05);
-            const satelliteMaterial = new THREE.MeshBasicMaterial({ color: 0x00FFFF });
+            const satelliteMaterial = new THREE.MeshBasicMaterial({ color: 0x00ffd5 });
             const satellite = new THREE.Mesh(satelliteGeometry, satelliteMaterial);
             satellite.position.set(1.5, 0, 0);
             scene.add(satellite);
@@ -356,6 +447,21 @@
         }
         setInterval(updateCountdown, 1000);
         updateCountdown();
+
+        // AI Assistant
+        document.getElementById('ai-assistant').addEventListener('click', function() {
+            alert('AI Assistant activated. How can I help you with mission control?');
+        });
+
+        // Simulated real-time data updates
+        function updateTelemetry() {
+            const telemetryItems = document.querySelectorAll('.telemetry-item span:last-child');
+            telemetryItems[0].textContent = `${(408 + Math.random() * 0.5).toFixed(1)} km`;
+            telemetryItems[1].textContent = `${(7.66 + Math.random() * 0.02).toFixed(2)} km/s`;
+            telemetryItems[2].textContent = `${(-15 + Math.random() * 1).toFixed(1)}°C`;
+            telemetryItems[3].textContent = `${(4.2 + Math.random() * 0.2).toFixed(1)} kW`;
+        }
+        setInterval(updateTelemetry, 2000);
     </script>
 </body>
 </html>

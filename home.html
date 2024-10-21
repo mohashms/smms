@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --background-color: #0a0a0a;
@@ -37,8 +38,8 @@
 
         .container {
             display: grid;
-            grid-template-columns: 250px 1fr 250px;
-            grid-template-rows: auto 1fr auto;
+            grid-template-columns: 80px 1fr 250px;
+            grid-template-rows: auto 1fr;
             height: 100vh;
             gap: 20px;
             padding: 20px;
@@ -128,35 +129,49 @@
             height: 100%;
         }
 
-        .bottom-nav {
-            grid-column: 1 / -1;
+        .nav-sidebar {
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
             background-color: var(--surface-color);
             backdrop-filter: blur(10px);
             border-radius: 15px;
-            padding: 10px;
         }
 
         .nav-item {
             color: var(--text-color);
             text-decoration: none;
-            padding: 10px 20px;
+            padding: 15px;
             border-radius: 10px;
             transition: background-color 0.2s ease;
+            font-size: 20px;
         }
 
         .nav-item:hover, .nav-item.active {
             background-color: rgba(255, 255, 255, 0.1);
         }
 
-        .nav-item i {
-            margin-right: 5px;
+        .alert-item {
+            background-color: rgba(255, 107, 107, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .mission-item {
+            background-color: rgba(0, 168, 255, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            font-size: 14px;
         }
 
         @media (max-width: 1200px) {
             .container {
-                grid-template-columns: 1fr;
+                grid-template-columns: 80px 1fr;
             }
 
             .sidebar {
@@ -180,21 +195,18 @@
             <div class="logo">Artemis SMMS</div>
             <div class="date-time" id="date-time"></div>
         </div>
-        <aside class="sidebar">
-            <!-- Left sidebar content -->
-            <div class="panel">
-                <h3 class="panel-title">Mission Overview</h3>
-                <div class="panel-content">
-                    <!-- Add mission overview content -->
-                </div>
+        <nav class="nav-sidebar">
+            <div>
+                <a href="#" class="nav-item active"><i class="fas fa-home"></i></a>
+                <a href="#" class="nav-item"><i class="fas fa-rocket"></i></a>
+                <a href="#" class="nav-item"><i class="fas fa-satellite"></i></a>
+                <a href="#" class="nav-item"><i class="fas fa-chart-line"></i></a>
             </div>
-            <div class="panel">
-                <h3 class="panel-title">Alerts</h3>
-                <div class="panel-content">
-                    <!-- Add alerts content -->
-                </div>
+            <div>
+                <a href="#" class="nav-item"><i class="fas fa-cog"></i></a>
+                <a href="#" class="nav-item"><i class="fas fa-user"></i></a>
             </div>
-        </aside>
+        </nav>
         <main class="main-content">
             <div class="panel earth-viz">
                 <h3 class="panel-title">Earth & Satellite Visualization</h3>
@@ -221,9 +233,24 @@
                     <div class="data-label">Data Transmitted Today</div>
                 </div>
             </div>
+            <div class="panel">
+                <h3 class="panel-title">Missions</h3>
+                <div class="panel-content">
+                    <div class="mission-item">Mars Rover Deployment: In Progress</div>
+                    <div class="mission-item">ISS Resupply: Scheduled in 3 days</div>
+                    <div class="mission-item">Lunar Gateway Construction: Planning Phase</div>
+                </div>
+            </div>
+            <div class="panel">
+                <h3 class="panel-title">Alerts</h3>
+                <div class="panel-content">
+                    <div class="alert-item">Warning: Increased solar activity detected</div>
+                    <div class="alert-item">Notice: Scheduled maintenance for Satellite A-127</div>
+                    <div class="alert-item">Alert: Debris detected in LEO, monitoring closely</div>
+                </div>
+            </div>
         </main>
         <aside class="sidebar">
-            <!-- Right sidebar content -->
             <div class="panel">
                 <h3 class="panel-title">Next Launch</h3>
                 <div class="panel-content">
@@ -234,30 +261,56 @@
             <div class="panel">
                 <h3 class="panel-title">System Health</h3>
                 <div class="panel-content">
-                    <!-- Add system health content -->
+                    <canvas id="systemHealthChart"></canvas>
                 </div>
             </div>
         </aside>
-        <nav class="bottom-nav">
-            <a href="#" class="nav-item"><i class="fas fa-paper-plane"></i></a>
-            <a href="#" class="nav-item"><i class="fas fa-th"></i></a>
-            <a href="#" class="nav-item"><i class="fas fa-square"></i></a>
-            <a href="#" class="nav-item"><i class="fas fa-leaf"></i></a>
-            <a href="#" class="nav-item"><i class="fas fa-font"></i></a>
-            <a href="#" class="nav-item"><i class="fas fa-circle"></i></a>
-            <a href="#" class="nav-item"><i class="fas fa-user-friends"></i></a>
-            <a href="#" class="nav-item"><i class="fas fa-code"></i></a>
-        </nav>
     </div>
-    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
     <script>
-        // Earth Visualization (same as before)
         function createEarthVisualization() {
-            // ... (Earth visualization code)
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, 2, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(document.getElementById('earth-container').offsetWidth, document.getElementById('earth-container').offsetHeight);
+            document.getElementById('earth-container').appendChild(renderer.domElement);
+
+            const earthGeometry = new THREE.SphereGeometry(1, 64, 64);
+            const earthMaterial = new THREE.MeshPhongMaterial({
+                map: new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg'),
+                bumpMap: new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/earth_normal_2048.jpg'),
+                bumpScale: 0.05,
+                specularMap: new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/earth_specular_2048.jpg'),
+                specular: new THREE.Color('grey')
+            });
+            const earth = new THREE.Mesh(earthGeometry, earthMaterial);
+            scene.add(earth);
+
+            const satelliteGeometry = new THREE.BoxGeometry(0.05, 0.05, 0.05);
+            const satelliteMaterial = new THREE.MeshBasicMaterial({ color: 0x00a8ff });
+            const satellite = new THREE.Mesh(satelliteGeometry, satelliteMaterial);
+            satellite.position.set(1.5, 0, 0);
+            scene.add(satellite);
+
+            const ambientLight = new THREE.AmbientLight(0x404040);
+            scene.add(ambientLight);
+
+            const pointLight = new THREE.PointLight(0xffffff, 1);
+            pointLight.position.set(5, 3, 5);
+            scene.add(pointLight);
+
+            camera.position.z = 3;
+
+            function animate() {
+                requestAnimationFrame(animate);
+                earth.rotation.y += 0.002;
+                satellite.rotation.y += 0.01;
+                satellite.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), 0.01);
+                renderer.render(scene, camera);
+            }
+            animate();
         }
         createEarthVisualization();
 
-        // Date and Time
         function updateDateTime() {
             const now = new Date();
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
@@ -266,7 +319,6 @@
         setInterval(updateDateTime, 1000);
         updateDateTime();
 
-        // Countdown Timer
         function updateCountdown() {
             const launchDate = new Date('2023-12-31T00:00:00').getTime();
             const now = new Date().getTime();
@@ -281,6 +333,35 @@
         }
         setInterval(updateCountdown, 1000);
         updateCountdown();
+
+        const ctx = document.getElementById('systemHealthChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Optimal', 'Good', 'Fair', 'Poor'],
+                datasets: [{
+                    data: [70, 20, 7, 3],
+                    backgroundColor: ['#00a8ff', '#ffd700', '#ff9f43', '#ee5253'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#ffffff',
+                            font: {
+                                size: 12
+                            }
+                        }
+                    }
+                }
+            }
+        });
     </script>
 </body>
 </html>

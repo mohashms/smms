@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artemis SMMS - Space Mission Management System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            height: 100vh;
+            background-color: #000;
+            color: #FFFFFF;
+            font-family: 'Roboto', sans-serif;
+            overflow: hidden;
+            background-image: url("https://th.bing.com/th/id/R.25be9b22133976c9f3efd44611b3d1e4?rik=UrqN2MsYRXI9bQ&riu=http%3a%2f%2fwww.pixelstalk.net%2fwp-content%2fuploads%2f2016%2f11%2fEarth-From-Space-HD-Backgrounds.jpg&ehk=PBqiIELezpuDd%2fkeHrYL9bq6Y56OXBm7N97eTJ9I35I%3d&risl=&pid=ImgRaw&r=0");
+            background-size: cover;
+            background-position: center;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 1;
+        }
+
+        .navbar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #4DD0E1;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-link {
+            color: #FFFFFF;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(77, 208, 225, 0.3);
+            font-size: 0.8rem;
+        }
+
+        .content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            padding: 1rem;
+        }
+
+        .header {
+            width: 100%;
+            max-width: 800px;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            border: 1px solid rgba(77, 208, 225, 0.3);
+            animation: fadeIn 1s ease-out;
+        }
+
+        .title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #FFFFFF;
+            margin-bottom: 0.5rem;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #B0BEC5;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            width: 100%;
+            max-width: 800px;
+            animation: fadeIn 1s ease-out 0.5s both;
+        }
+
+        .grid-item {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(77, 208, 225, 0.3);
+        }
+
+        .grid-item-wide {
+            grid-column: span 3;
+        }
+
+        .icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #4DD0E1;
+        }
+
+        .item-title {
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 0.3rem;
+            color: #FFFFFF;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .item-description {
+            font-size: 0.7rem;
+            color: #B0BEC5;
+        }
+
+        .get-started-button {
+            margin-top: 1rem;
+            padding: 0.8rem 2rem;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #000;
+            background-color: #4DD0E1;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: fadeIn 1s ease-out 1s both;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    <nav class="navbar">
+        <div class="logo">Artemis SMMS</div>
+        <div class="nav-links">
+            <a href="/login" class="nav-link">Log In</a>
+            <a href="/signup" class="nav-link">Sign Up</a>
+        </div>
+    </nav>
+    <div class="content">
+        <header class="header">
+            <h1 class="title">Artemis Space Mission Management System</h1>
+            <h2 class="subtitle">Empowering the Next Generation of Space Exploration</h2>
+        </header>
+        <div class="grid">
+            <div class="grid-item">
+                <div class="icon">🚀</div>
+                <h3 class="item-title">Launch Coordination</h3>
+                <p class="item-description">Optimize launch windows and mission planning</p>
+            </div>
+            <div class="grid-item">
+                <div class="icon">🛰️</div>
+                <h3 class="item-title">Satellite Operations</h3>
+                <p class="item-description">Automate satellite fleet management</p>
+            </div>
+            <div class="grid-item">
+                <div class="icon">🛡️</div>
+                <h3 class="item-title">Collision Avoidance</h3>
+                <p class="item-description">AI-driven collision prediction and prevention</p>
+            </div>
+            <div class="grid-item grid-item-wide">
+                <div class="icon">🌍</div>
+                <h3 class="item-title">Global Mission Control</h3>
+                <p class="item-description">Seamlessly connect multiple control centers worldwide</p>
+            </div>
+        </div>
+        <button class="get-started-button">Get Started</button>
+    </div>
+</body>
+</html>

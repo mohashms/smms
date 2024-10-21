@@ -229,11 +229,20 @@
             }
         }
     </style>
+    <script>
+        // Function to handle button click and redirect to home.html
+        document.addEventListener('DOMContentLoaded', function () {
+            const getStartedButton = document.querySelector('.get-started-button');
+            getStartedButton.addEventListener('click', function () {
+                window.location.href = 'home.html'; // Redirects to home.html when clicked
+            });
+        });
+    </script>
 </head>
 <body>
     <div class="overlay"></div>
     <nav class="navbar">
-        <div class="logo">Aretmis SMMS</div>
+        <div class="logo">Artemis SMMS</div>
         <div class="nav-links">
             <a href="/login" class="nav-link">Log In</a>
             <a href="/signup" class="nav-link">Sign Up</a>
@@ -241,7 +250,7 @@
     </nav>
     <div class="content">
         <header class="header">
-            <h1 class="title">Aretmis Space Mission Management System</h1>
+            <h1 class="title">Artemis Space Mission Management System</h1>
             <h2 class="subtitle">Empowering the Next Generation of Space Exploration</h2>
         </header>
         <div class="grid">
@@ -266,7 +275,7 @@
                 <p class="item-description">Seamlessly connect multiple control centers worldwide</p>
             </div>
         </div>
-         <a href="home.html" class="get-started-button">Get Started</a>
+        <button class="get-started-button">Get Started</button>
     </div>
 </body>
 </html>

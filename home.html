@@ -115,10 +115,15 @@
             border-radius: 15px;
             padding: 20px;
             backdrop-filter: blur(10px);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
         }
 
         .panel-title {
@@ -133,7 +138,6 @@
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
-            overflow-y: auto;
         }
 
         .data-value {
@@ -203,20 +207,28 @@
             color: #ff0000;
         }
 
-        .chart-container {
-            width: 100%;
-            height: 100%;
-            min-height: 200px;
+        /* Custom scrollbar styles */
+        .main-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .main-content::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .main-content::-webkit-scrollbar-thumb {
+            background-color: var(--primary-color);
+            border-radius: 4px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="top-bar">
+        <header class="top-bar">
             <div class="logo">Artemis SMMS</div>
             <div class="date-time" id="date-time"></div>
             <img src="https://i.pravatar.cc/150?img=3" alt="User Avatar" class="user-avatar">
-        </div>
+        </header>
         <nav class="nav-sidebar">
             <a href="#" class="nav-item active"><i class="fas fa-home"></i></a>
             <a href="#" class="nav-item"><i class="fas fa-rocket"></i></a>
@@ -227,7 +239,7 @@
         <main class="main-content">
             <div class="panel earth-viz">
                 <h3 class="panel-title">Earth & Satellite Visualization</h3>
-                <div id="earth-container" class="panel-content"></div>
+                <div id="earth-container"></div>
             </div>
             <div class="panel">
                 <h3 class="panel-title">Active Missions</h3>
@@ -243,6 +255,38 @@
                     <div class="data-label">Operational Satellites</div>
                 </div>
             </div>
+            <div class="panel elongated">
+                <h3 class="panel-title">Data Transmission</h3>
+                <div class="panel-content">
+                    <canvas id="dataTransmissionChart"></canvas>
+                </div>
+            </div>
+            <div class="panel">
+                <h3 class="panel-title">Resource Utilization</h3>
+                <div class="panel-content">
+                    <canvas id="resourceUtilizationChart"></canvas>
+                </div>
+            </div>
+            <div class="panel">
+                <h3 class="panel-title">Launch Success Rate</h3>
+                <div class="panel-content">
+                    <canvas id="launchSuccessChart"></canvas>
+                </div>
+            </div>
+            <div class="panel elongated">
+                <h3 class="panel-title">Mission Status</h3>
+                <div class="panel-content" id="missionStatus">
+                    <div class="mission-item">
+                        <strong>Mars Exploration:</strong> Day 732 - Rover analyzing soil samples
+                    </div>
+                    <div class="mission-item">
+                        <strong>Lunar Base Construction:</strong> Phase 2 - Habitat modules deployment
+                    </div>
+                    <div class="mission-item">
+                        <strong>Deep Space Network:</strong> Upgrading Canberra facility
+                    </div>
+                </div>
+            </div>
             <div class="panel">
                 <h3 class="panel-title">Next Launch</h3>
                 <div class="panel-content">
@@ -250,55 +294,10 @@
                     <div class="data-label">Time to Next Launch</div>
                 </div>
             </div>
-            <div class="panel elongated">
-                <h3 class="panel-title">Data Transmission</h3>
-                <div class="panel-content">
-                    <div class="chart-container">
-                        <canvas id="dataTransmissionChart"></canvas>
-                    </div>
-                </div>
-            </div>
-            <div class="panel">
-                <h3 class="panel-title">Resource Utilization</h3>
-                <div class="panel-content">
-                    <div class="chart-container">
-                        <canvas id="resourceUtilizationChart"></canvas>
-                    </div>
-                </div>
-            </div>
-            <div class="panel">
-                <h3 class="panel-title">Launch Success Rate</h3>
-                <div class="panel-content">
-                    <div class="chart-container">
-                        <canvas id="launchSuccessChart"></canvas>
-                    </div>
-                </div>
-            </div>
-            <div class="panel elongated">
-                <h3 class="panel-title">Mission Status</h3>
-                <div class="panel-content">
-                    <div class="mission-item">Mars Rover Deployment: In Progress</div>
-                    <div class="mission-item">ISS Resupply: Scheduled in 3 days</div>
-                    <div class="mission-item">Lunar Gateway Construction: Planning Phase</div>
-                    <div class="mission-item">Asteroid Sample Return: En Route to Earth</div>
-                    <div class="mission-item">ExoMars: Preparing for Launch</div>
-                </div>
-            </div>
-            <div class="panel elongated">
-                <h3 class="panel-title">Critical Alerts</h3>
-                <div class="panel-content">
-                    <div class="alert-item">Warning: Increased solar activity detected</div>
-                    <div class="alert-item">Notice: Scheduled maintenance for Satellite A-127</div>
-                    <div class="alert-item">Alert: Debris detected in LEO, monitoring closely</div>
-                    <div class="alert-item">Caution: Atmospheric anomaly on Mars, investigating</div>
-                </div>
-            </div>
             <div class="panel">
                 <h3 class="panel-title">System Health</h3>
                 <div class="panel-content">
-                    <div class="chart-container">
-                        <canvas id="systemHealthChart"></canvas>
-                    </div>
+                    <canvas id="systemHealthChart"></canvas>
                 </div>
             </div>
             <div class="panel">
@@ -308,6 +307,20 @@
             <div class="panel">
                 <h3 class="panel-title">Upcoming Events</h3>
                 <div class="panel-content" id="upcomingEvents"></div>
+            </div>
+            <div class="panel elongated">
+                <h3 class="panel-title">Critical Alerts</h3>
+                <div class="panel-content" id="criticalAlerts">
+                    <div class="alert-item">
+                        <strong>Warning:</strong> Solar flare activity increasing - Potential communication disruptions
+                    </div>
+                    <div class="alert-item">
+                        <strong>Alert:</strong> ISS oxygen recycling system maintenance required
+                    </div>
+                    <div class="alert-item">
+                        <strong>Notice:</strong> Scheduled software update for Mars rovers - Temporary operational pause
+                    </div>
+                </div>
             </div>
         </main>
     </div>

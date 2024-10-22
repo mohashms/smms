@@ -37,23 +37,50 @@
         }
 
         .container {
-            display: grid;
-            grid-template-columns: 80px 1fr;
-            grid-template-rows: 60px 1fr;
+            display: flex;
             height: 100vh;
         }
 
+        .nav-sidebar {
+            width: 80px;
+            background-color: var(--surface-color);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+            height: 100vh;
+        }
+
+        .nav-item {
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            transition: background-color 0.2s ease;
+            font-size: 20px;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .main-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
         .top-bar {
-            grid-column: 1 / -1;
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 20px;
+            height: 60px;
             background-color: var(--surface-color);
             backdrop-filter: blur(10px);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
         }
 
         .logo {
@@ -74,40 +101,14 @@
             object-fit: cover;
         }
 
-        .nav-sidebar {
-            background-color: var(--surface-color);
-            backdrop-filter: blur(10px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px 0;
-            position: sticky;
-            top: 60px;
-            height: calc(100vh - 60px);
-        }
-
-        .nav-item {
-            color: var(--text-color);
-            text-decoration: none;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            transition: background-color 0.2s ease;
-            font-size: 20px;
-        }
-
-        .nav-item:hover, .nav-item.active {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
         .main-content {
+            flex-grow: 1;
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             grid-auto-rows: minmax(200px, auto);
             gap: 20px;
             padding: 20px;
             overflow-y: auto;
-            max-height: calc(100vh - 60px);
         }
 
         .panel {
@@ -192,43 +193,17 @@
             margin-bottom: 10px;
         }
 
-        .network-status span {
-            padding: 2px 6px;
-            border-radius: 4px;
-        }
-
         .status-online {
-            background-color: rgba(0, 255, 0, 0.2);
-            color: #00ff00;
+            color: #2ecc71;
         }
 
         .status-offline {
-            background-color: rgba(255, 0, 0, 0.2);
-            color: #ff0000;
-        }
-
-        /* Custom scrollbar styles */
-        .main-content::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .main-content::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .main-content::-webkit-scrollbar-thumb {
-            background-color: var(--primary-color);
-            border-radius: 4px;
+            color: #e74c3c;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header class="top-bar">
-            <div class="logo">Artemis SMMS</div>
-            <div class="date-time" id="date-time"></div>
-            <img src="https://i.pravatar.cc/150?img=3" alt="User Avatar" class="user-avatar">
-        </header>
         <nav class="nav-sidebar">
             <a href="#" class="nav-item active"><i class="fas fa-home"></i></a>
             <a href="#" class="nav-item"><i class="fas fa-rocket"></i></a>
@@ -236,103 +211,90 @@
             <a href="#" class="nav-item"><i class="fas fa-chart-line"></i></a>
             <a href="#" class="nav-item"><i class="fas fa-cog"></i></a>
         </nav>
-        <main class="main-content">
-            <div class="panel earth-viz">
-                <h3 class="panel-title">Earth & Satellite Visualization</h3>
-                <div id="earth-container"></div>
+        <div class="main-area">
+            <div class="top-bar">
+                <div class="logo">Artemis SMMS</div>
+                <div class="date-time" id="date-time"></div>
+                <img src="https://i.pravatar.cc/150?img=3" alt="User Avatar" class="user-avatar">
             </div>
-            <div class="panel">
-                <h3 class="panel-title">Active Missions</h3>
-                <div class="panel-content">
-                    <div class="data-value">12</div>
-                    <div class="data-label">Current Active Missions</div>
+            <main class="main-content">
+                <div class="panel earth-viz">
+                    <h2 class="panel-title">Earth & Satellite Visualization</h2>
+                    <div class="panel-content" id="earth-container"></div>
                 </div>
-            </div>
-            <div class="panel">
-                <h3 class="panel-title">Satellite Network</h3>
-                <div class="panel-content">
-                    <div class="data-value">247</div>
-                    <div class="data-label">Operational Satellites</div>
-                </div>
-            </div>
-            <div class="panel elongated">
-                <h3 class="panel-title">Data Transmission</h3>
-                <div class="panel-content">
-                    <canvas id="dataTransmissionChart"></canvas>
-                </div>
-            </div>
-            <div class="panel">
-                <h3 class="panel-title">Resource Utilization</h3>
-                <div class="panel-content">
-                    <canvas id="resourceUtilizationChart"></canvas>
-                </div>
-            </div>
-            <div class="panel">
-                <h3 class="panel-title">Launch Success Rate</h3>
-                <div class="panel-content">
-                    <canvas id="launchSuccessChart"></canvas>
-                </div>
-            </div>
-            <div class="panel elongated">
-                <h3 class="panel-title">Mission Status</h3>
-                <div class="panel-content" id="missionStatus">
-                    <div class="mission-item">
-                        <strong>Mars Exploration:</strong> Day 732 - Rover analyzing soil samples
-                    </div>
-                    <div class="mission-item">
-                        <strong>Lunar Base Construction:</strong> Phase 2 - Habitat modules deployment
-                    </div>
-                    <div class="mission-item">
-                        <strong>Deep Space Network:</strong> Upgrading Canberra facility
+                <div class="panel">
+                    <h2 class="panel-title">Active Missions</h2>
+                    <div class="panel-content" id="activeMissions">
+                        <div class="mission-item">Mars Exploration - Day 234</div>
+                        <div class="mission-item">Lunar Base Construction - Phase 2</div>
+                        <div class="mission-item">Deep Space Network Upgrade</div>
                     </div>
                 </div>
-            </div>
-            <div class="panel">
-                <h3 class="panel-title">Next Launch</h3>
-                <div class="panel-content">
-                    <div class="data-value" id="countdown">T-00:00:00</div>
-                    <div class="data-label">Time to Next Launch</div>
-                </div>
-            </div>
-            <div class="panel">
-                <h3 class="panel-title">System Health</h3>
-                <div class="panel-content">
-                    <canvas id="systemHealthChart"></canvas>
-                </div>
-            </div>
-            <div class="panel">
-                <h3 class="panel-title">Interplanetary Network Status</h3>
-                <div class="panel-content" id="networkStatus"></div>
-            </div>
-            <div class="panel">
-                <h3 class="panel-title">Upcoming Events</h3>
-                <div class="panel-content" id="upcomingEvents"></div>
-            </div>
-            <div class="panel elongated">
-                <h3 class="panel-title">Critical Alerts</h3>
-                <div class="panel-content" id="criticalAlerts">
-                    <div class="alert-item">
-                        <strong>Warning:</strong> Solar flare activity increasing - Potential communication disruptions
-                    </div>
-                    <div class="alert-item">
-                        <strong>Alert:</strong> ISS oxygen recycling system maintenance required
-                    </div>
-                    <div class="alert-item">
-                        <strong>Notice:</strong> Scheduled software update for Mars rovers - Temporary operational pause
+                <div class="panel">
+                    <h2 class="panel-title">Satellite Network</h2>
+                    <div class="panel-content">
+                        <div class="data-value">247</div>
+                        <div class="data-label">Operational Satellites</div>
                     </div>
                 </div>
-            </div>
-        </main>
+                <div class="panel elongated">
+                    <h2 class="panel-title">Data Transmission</h2>
+                    <div class="panel-content">
+                        <canvas id="dataTransmissionChart"></canvas>
+                    </div>
+                </div>
+                <div class="panel">
+                    <h2 class="panel-title">Resource Utilization</h2>
+                    <div class="panel-content">
+                        <canvas id="resourceUtilizationChart"></canvas>
+                    </div>
+                </div>
+                <div class="panel">
+                    <h2 class="panel-title">Launch Success Rate</h2>
+                    <div class="panel-content">
+                        <canvas id="launchSuccessChart"></canvas>
+                    </div>
+                </div>
+                <div class="panel elongated">
+                    <h2 class="panel-title">Mission Status</h2>
+                    <div class="panel-content" id="missionStatus">
+                        <div class="data-value" id="countdown">T-00:00:00</div>
+                        <div class="data-label">Next Launch</div>
+                    </div>
+                </div>
+                <div class="panel elongated">
+                    <h2 class="panel-title">Critical Alerts</h2>
+                    <div class="panel-content" id="criticalAlerts">
+                        <div class="alert-item">Solar Flare Detected - Adjusting Satellite Orbits</div>
+                        <div class="alert-item">Oxygen Recycler Maintenance Required - ISS Module 3</div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <h2 class="panel-title">System Health</h2>
+                    <div class="panel-content">
+                        <canvas id="systemHealthChart"></canvas>
+                    </div>
+                </div>
+                <div class="panel">
+                    <h2 class="panel-title">Interplanetary Network Status</h2>
+                    <div class="panel-content" id="networkStatus"></div>
+                </div>
+                <div class="panel">
+                    <h2 class="panel-title">Upcoming Events</h2>
+                    <div class="panel-content" id="upcomingEvents"></div>
+                </div>
+            </main>
+        </div>
     </div>
     <script>
         function createEarthVisualization() {
             const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(75, 2, 0.1, 1000);
-            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            const camera = new THREE.PerspectiveCamera(75, document.getElementById('earth-container').offsetWidth / document.getElementById('earth-container').offsetHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer();
             renderer.setSize(document.getElementById('earth-container').offsetWidth, document.getElementById('earth-container').offsetHeight);
             document.getElementById('earth-container').appendChild(renderer.domElement);
 
-            const earthGeometry = new THREE.SphereGeometry(1, 64, 64);
+            const earthGeometry = new THREE.SphereGeometry(1, 32, 32);
             const earthMaterial = new THREE.MeshPhongMaterial({
                 map: new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg'),
                 bumpMap: new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/earth_normal_2048.jpg'),
@@ -342,12 +304,6 @@
             });
             const earth = new THREE.Mesh(earthGeometry, earthMaterial);
             scene.add(earth);
-
-            const satelliteGeometry = new THREE.BoxGeometry(0.05, 0.05, 0.05);
-            const satelliteMaterial = new THREE.MeshBasicMaterial({ color: 0x00a8ff });
-            const satellite = new THREE.Mesh(satelliteGeometry, satelliteMaterial);
-            satellite.position.set(1.5, 0, 0);
-            scene.add(satellite);
 
             const ambientLight = new THREE.AmbientLight(0x404040);
             scene.add(ambientLight);
@@ -360,9 +316,7 @@
 
             function animate() {
                 requestAnimationFrame(animate);
-                earth.rotation.y += 0.002;
-                satellite.rotation.y += 0.01;
-                satellite.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), 0.01);
+                earth.rotation.y += 0.005;
                 renderer.render(scene, camera);
             }
             animate();

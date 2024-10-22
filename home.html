@@ -118,6 +118,7 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
 
         .panel-title {
@@ -132,6 +133,7 @@
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
+            overflow-y: auto;
         }
 
         .data-value {
@@ -189,7 +191,6 @@
         .network-status span {
             padding: 2px 6px;
             border-radius: 4px;
-            font-size: 12px;
         }
 
         .status-online {
@@ -200,6 +201,12 @@
         .status-offline {
             background-color: rgba(255, 0, 0, 0.2);
             color: #ff0000;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 100%;
+            min-height: 200px;
         }
     </style>
 </head>
@@ -220,7 +227,7 @@
         <main class="main-content">
             <div class="panel earth-viz">
                 <h3 class="panel-title">Earth & Satellite Visualization</h3>
-                <div id="earth-container"></div>
+                <div id="earth-container" class="panel-content"></div>
             </div>
             <div class="panel">
                 <h3 class="panel-title">Active Missions</h3>
@@ -245,34 +252,53 @@
             </div>
             <div class="panel elongated">
                 <h3 class="panel-title">Data Transmission</h3>
-                <canvas id="dataTransmissionChart"></canvas>
+                <div class="panel-content">
+                    <div class="chart-container">
+                        <canvas id="dataTransmissionChart"></canvas>
+                    </div>
+                </div>
             </div>
-            <div class="panel elongated">
+            <div class="panel">
                 <h3 class="panel-title">Resource Utilization</h3>
-                <canvas id="resourceUtilizationChart"></canvas>
+                <div class="panel-content">
+                    <div class="chart-container">
+                        <canvas id="resourceUtilizationChart"></canvas>
+                    </div>
+                </div>
             </div>
             <div class="panel">
                 <h3 class="panel-title">Launch Success Rate</h3>
-                <canvas id="launchSuccessChart"></canvas>
-            </div>
-            <div class="panel">
-                <h3 class="panel-title">System Health</h3>
-                <canvas id="systemHealthChart"></canvas>
+                <div class="panel-content">
+                    <div class="chart-container">
+                        <canvas id="launchSuccessChart"></canvas>
+                    </div>
+                </div>
             </div>
             <div class="panel elongated">
                 <h3 class="panel-title">Mission Status</h3>
-                <div class="panel-content" id="missionStatus">
+                <div class="panel-content">
                     <div class="mission-item">Mars Rover Deployment: In Progress</div>
                     <div class="mission-item">ISS Resupply: Scheduled in 3 days</div>
                     <div class="mission-item">Lunar Gateway Construction: Planning Phase</div>
+                    <div class="mission-item">Asteroid Sample Return: En Route to Earth</div>
+                    <div class="mission-item">ExoMars: Preparing for Launch</div>
                 </div>
             </div>
             <div class="panel elongated">
                 <h3 class="panel-title">Critical Alerts</h3>
-                <div class="panel-content" id="criticalAlerts">
+                <div class="panel-content">
                     <div class="alert-item">Warning: Increased solar activity detected</div>
                     <div class="alert-item">Notice: Scheduled maintenance for Satellite A-127</div>
                     <div class="alert-item">Alert: Debris detected in LEO, monitoring closely</div>
+                    <div class="alert-item">Caution: Atmospheric anomaly on Mars, investigating</div>
+                </div>
+            </div>
+            <div class="panel">
+                <h3 class="panel-title">System Health</h3>
+                <div class="panel-content">
+                    <div class="chart-container">
+                        <canvas id="systemHealthChart"></canvas>
+                    </div>
                 </div>
             </div>
             <div class="panel">

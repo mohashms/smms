@@ -38,7 +38,7 @@
 
         .container {
             display: grid;
-            grid-template-columns: 80px 1fr 300px;
+            grid-template-columns: 80px 1fr;
             grid-template-rows: 60px 1fr;
             height: 100vh;
         }
@@ -102,7 +102,7 @@
 
         .main-content {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             grid-auto-rows: minmax(200px, auto);
             gap: 20px;
             padding: 20px;
@@ -157,10 +157,10 @@
         }
 
         .elongated {
-            grid-column: span 3;
+            grid-column: span 2;
         }
 
-        .alert-item, .mission-item {
+        .alert-item, .mission-item, .event-item {
             background-color: rgba(255, 255, 255, 0.1);
             border-radius: 8px;
             padding: 10px;
@@ -176,29 +176,30 @@
             border-left: 4px solid var(--primary-color);
         }
 
-        .right-sidebar {
-            background-color: var(--surface-color);
-            backdrop-filter: blur(10px);
-            padding: 20px;
-            overflow-y: auto;
-            max-height: calc(100vh - 60px);
-        }
-
         .event-item {
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            padding: 10px;
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .network-status {
+            display: flex;
+            justify-content: space-between;
             margin-bottom: 10px;
-            font-size: 14px;
         }
 
-        .event-name {
-            font-weight: 600;
-        }
-
-        .event-date {
+        .network-status span {
+            padding: 2px 6px;
+            border-radius: 4px;
             font-size: 12px;
-            color: var(--secondary-color);
+        }
+
+        .status-online {
+            background-color: rgba(0, 255, 0, 0.2);
+            color: #00ff00;
+        }
+
+        .status-offline {
+            background-color: rgba(255, 0, 0, 0.2);
+            color: #ff0000;
         }
     </style>
 </head>
@@ -207,7 +208,7 @@
         <div class="top-bar">
             <div class="logo">Artemis SMMS</div>
             <div class="date-time" id="date-time"></div>
-            <img src="https://i.pravatar.cc/150?img=12" alt="User Avatar" class="user-avatar">
+            <img src="https://i.pravatar.cc/150?img=3" alt="User Avatar" class="user-avatar">
         </div>
         <nav class="nav-sidebar">
             <a href="#" class="nav-item active"><i class="fas fa-home"></i></a>
@@ -235,23 +236,28 @@
                     <div class="data-label">Operational Satellites</div>
                 </div>
             </div>
-            <div class="panel elongated">
-                <h3 class="panel-title">Data Transmission</h3>
+            <div class="panel">
+                <h3 class="panel-title">Next Launch</h3>
                 <div class="panel-content">
-                    <canvas id="dataTransmissionChart"></canvas>
+                    <div class="data-value" id="countdown">T-00:00:00</div>
+                    <div class="data-label">Time to Next Launch</div>
                 </div>
             </div>
-            <div class="panel">
+            <div class="panel elongated">
+                <h3 class="panel-title">Data Transmission</h3>
+                <canvas id="dataTransmissionChart"></canvas>
+            </div>
+            <div class="panel elongated">
                 <h3 class="panel-title">Resource Utilization</h3>
-                <div class="panel-content">
-                    <canvas id="resourceUtilizationChart"></canvas>
-                </div>
+                <canvas id="resourceUtilizationChart"></canvas>
             </div>
             <div class="panel">
                 <h3 class="panel-title">Launch Success Rate</h3>
-                <div class="panel-content">
-                    <canvas id="launchSuccessChart"></canvas>
-                </div>
+                <canvas id="launchSuccessChart"></canvas>
+            </div>
+            <div class="panel">
+                <h3 class="panel-title">System Health</h3>
+                <canvas id="systemHealthChart"></canvas>
             </div>
             <div class="panel elongated">
                 <h3 class="panel-title">Mission Status</h3>
@@ -269,21 +275,6 @@
                     <div class="alert-item">Alert: Debris detected in LEO, monitoring closely</div>
                 </div>
             </div>
-        </main>
-        <aside class="right-sidebar">
-            <div class="panel">
-                <h3 class="panel-title">Next Launch</h3>
-                <div class="panel-content">
-                    <div class="data-value" id="countdown">T-00:00:00</div>
-                    <div class="data-label">Time to Next Launch</div>
-                </div>
-            </div>
-            <div class="panel">
-                <h3 class="panel-title">System Health</h3>
-                <div class="panel-content">
-                    <canvas id="systemHealthChart"></canvas>
-                </div>
-            </div>
             <div class="panel">
                 <h3 class="panel-title">Interplanetary Network Status</h3>
                 <div class="panel-content" id="networkStatus"></div>
@@ -292,7 +283,7 @@
                 <h3 class="panel-title">Upcoming Events</h3>
                 <div class="panel-content" id="upcomingEvents"></div>
             </div>
-        </aside>
+        </main>
     </div>
     <script>
         function createEarthVisualization() {
@@ -362,7 +353,6 @@
         setInterval(updateCountdown, 1000);
         updateCountdown();
 
-        // System Health Chart
         const ctx = document.getElementById('systemHealthChart').getContext('2d');
         new Chart(ctx, {
             type: 'doughnut',
@@ -392,7 +382,6 @@
             }
         });
 
-        // Data Transmission Chart
         const dataTransmissionCtx = document.getElementById('dataTransmissionChart').getContext('2d');
         new Chart(dataTransmissionCtx, {
             type: 'line',
@@ -436,7 +425,6 @@
             }
         });
 
-        // Resource Utilization Chart
         const resourceUtilizationCtx = document.getElementById('resourceUtilizationChart').getContext('2d');
         new Chart(resourceUtilizationCtx, {
             type: 'bar',
@@ -480,7 +468,6 @@
             }
         });
 
-        // Launch Success Chart
         const launchSuccessCtx = document.getElementById('launchSuccessChart').getContext('2d');
         new Chart(launchSuccessCtx, {
             type: 'pie',
@@ -509,19 +496,20 @@
             }
         });
 
-        // Interplanetary Network Status
         function updateNetworkStatus() {
             const networkStatus = document.getElementById('networkStatus');
             const nodes = ['Earth', 'Moon Base', 'Mars Outpost', 'Europa Station', 'Titan Relay'];
             const statuses = ['Online', 'Online', 'Online', 'Online', 'Offline'];
             
             networkStatus.innerHTML = nodes.map((node, index) => 
-                `<div>${node}: <span style="color: ${statuses[index] === 'Online' ? '#00a8ff' : '#ee5253'}">${statuses[index]}</span></div>`
+                `<div class="network-status">
+                    <span>${node}</span>
+                    <span class="status-${statuses[index].toLowerCase()}">${statuses[index]}</span>
+                </div>`
             ).join('');
         }
         updateNetworkStatus();
 
-        // Upcoming Events
         function updateUpcomingEvents() {
             const events = [
                 { name: 'Satellite Launch', date: '2023-04-15' },

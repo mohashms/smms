@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artemis SMMS - Satellite Operations</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --background-color: #000000;
+            --surface-color: rgba(20, 20, 20, 0.9);
+            --panel-bg: rgba(30, 30, 30, 0.8);
+            --panel-hover-bg: rgba(40, 40, 40, 0.9);
+            --text-color: #ffffff;
+            --primary-color: #00a8ff;
+            --secondary-color: #7f8c8d;
+            --accent-color: #ff6b6b;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            height: 100vh;
+            overflow: hidden;
+            background-image: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=2072&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            grid-template-rows: 60px 1fr;
+            height: 100vh;
+        }
+
+        .top-bar {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            background-color: var(--surface-color);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+        }
+
+        .logo i {
+            margin-right: 10px;
+        }
+
+        .date-time {
+            font-size: 14px;
+            color: var(--secondary-color);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary-color);
+        }
+
+        .nav-sidebar {
+            background-color: var(--surface-color);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+            position: sticky;
+            top: 60px;
+            height: calc(100vh - 60px);
+            border-right: 1px solid var(--border-color);
+        }
+
+        .nav-item {
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            font-size: 20px;
+            width: 50px;
+            text-align: center;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background-color: var(--panel-hover-bg);
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 168, 255, 0.2);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(3, minmax(200px, auto));
+            gap: 20px;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: calc(100vh - 60px);
+        }
+
+        .panel {
+            background-color: var(--panel-bg);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 168, 255, 0.3);
+        }
+
+        .panel-title {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+        }
+
+        .panel-title i {
+            margin-right: 10px;
+        }
+
+        .panel-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            overflow-y: auto;
+        }
+
+        .satellite-map {
+            grid-column: span 2;
+            grid-row: span 2;
+        }
+
+        .satellite-map .panel-content {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            height: 0;
+            overflow: hidden;
+        }
+
+        .satellite-map img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .satellite-item {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .satellite-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .satellite-item i {
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+
+        .data-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: var(--primary-color);
+        }
+
+        .data-label {
+            font-size: 14px;
+            color: var(--secondary-color);
+        }
+
+        .alert-item {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--warning-color);
+        }
+
+        .alert-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .alert-item i {
+            margin-right: 10px;
+            color: var(--warning-color);
+        }
+
+        /* Scrollbar styles */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #0077be;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="top-bar">
+            <div class="logo"><i class="fas fa-satellite"></i> Artemis SMMS</div>
+            <div class="date-time" id="date-time"></div>
+            <img src="https://i.pravatar.cc/150?img=5" alt="User Avatar" class="user-avatar">
+        </header>
+        <nav class="nav-sidebar">
+            <a href="home.html" class="nav-item"><i class="fas fa-home"></i></a>
+            <a href="launch.html" class="nav-item"><i class="fas fa-rocket"></i></a>
+            <a href="satellite.html" class="nav-item active"><i class="fas fa-satellite"></i></a>
+            <a href="#" class="nav-item"><i class="fas fa-chart-line"></i></a>
+            <a href="#" class="nav-item"><i class="fas fa-cog"></i></a>
+        </nav>
+        <main class="main-content">
+            <div class="panel satellite-map">
+                <h2 class="panel-title"><i class="fas fa-globe"></i> Satellite Network Map</h2>
+                <div class="panel-content">
+                    <img src="https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2020/04/satellite_constellations_around_earth/21956643-1-eng-GB/Satellite_constellations_around_Earth_pillars.jpg" alt="Satellite Network Map">
+                </div>
+            </div>
+            <div class="panel">
+                <h2 class="panel-title"><i class="fas fa-signal"></i> Network Status</h2>
+                <div class="panel-content">
+                    <div class="data-value">98.7%</div>
+                    <div class="data-label">Network Uptime</div>
+                </div>
+            </div>
+            <div class="panel">
+                <h2 class="panel-title"><i class="fas fa-satellite-dish"></i> Active Satellites</h2>
+                <div class="panel-content">
+                    <div class="data-value">42</div>
+                    <div class="data-label">Operational Satellites</div>
+                </div>
+            </div>
+            <div class="panel">
+                <h2 class="panel-title"><i class="fas fa-list"></i> Satellite List</h2>
+                <div class="panel-content" id="satelliteList">
+                    <div class="satellite-item">
+                        <i class="fas fa-satellite"></i>
+                        <div>
+                            <div class="satellite-name">Artemis-1</div>
+                            <div class="satellite-status">Status: Operational</div>
+                        </div>
+                    </div>
+                    <div class="satellite-item">
+                        <i class="fas fa-satellite"></i>
+                        <div>
+                            <div class="satellite-name">Lunar Orbiter</div>
+                            <div class="satellite-status">Status: Operational</div>
+                        </div>
+                    </div>
+                    <div class="satellite-item">
+                        <i class="fas fa-satellite"></i>
+                        <div>
+                            <div class="satellite-name">Mars Relay</div>
+                            <div class="satellite-status">Status: Maintenance</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel">
+                <h2 class="panel-title"><i class="fas fa-chart-line"></i> Data Transmission</h2>
+                <div class="panel-content">
+                    <canvas id="dataTransmissionChart"></canvas>
+                </div>
+            </div>
+            <div class="panel">
+                <h2 class="panel-title"><i class="fas fa-bell"></i> Alerts</h2>
+                <div class="panel-content" id="alerts">
+                    <div class="alert-item"><i class="fas fa-exclamation-triangle"></i> Scheduled maintenance for Lunar Orbiter in 48 hours.</div>
+                    <div class="alert-item"><i class="fas fa-exclamation-triangle"></i> Solar flare detected - potential communication disruptions.</div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        function updateDateTime() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            document.getElementById('date-time').textContent = now.toLocaleDateString('en-US', options) + ' ' + now.toLocaleTimeString('en-US', timeOptions);
+        }
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+
+        // Data Transmission Chart
+        const ctx = document.getElementById('dataTransmissionChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+                datasets: [{
+                    label: 'Data Transmitted (TB)',
+                    data: [12, 19, 3, 5, 2, 3],
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

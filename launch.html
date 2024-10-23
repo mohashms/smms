@@ -3,18 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Artemis SMMS - Launch Control</title>
+    <title>Artemis SMMS - Launch Coordination</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --background-color: #001f3f;
-            --surface-color: rgba(0, 41, 84, 0.8);
+            --background-color: #000000;
+            --surface-color: rgba(20, 20, 20, 0.8);
+            --panel-bg: rgba(30, 30, 30, 0.7);
+            --panel-hover-bg: rgba(40, 40, 40, 0.8);
             --text-color: #ffffff;
             --primary-color: #00a8ff;
             --secondary-color: #7f8c8d;
             --accent-color: #ff6b6b;
-            --border-color: rgba(255, 255, 255, 0.2);
+            --border-color: rgba(255, 255, 255, 0.1);
         }
 
         * {
@@ -28,24 +32,28 @@
             background-color: var(--background-color);
             color: var(--text-color);
             line-height: 1.5;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
         }
 
         .container {
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            grid-template-rows: 60px 1fr;
+            height: 100vh;
         }
 
         .top-bar {
+            grid-column: 1 / -1;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px;
+            padding: 0 20px;
             background-color: var(--surface-color);
             backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
             border-bottom: 1px solid var(--border-color);
         }
 
@@ -61,55 +69,76 @@
             margin-right: 10px;
         }
 
-        .nav-links {
-            display: flex;
-            gap: 20px;
+        .date-time {
+            font-size: 14px;
+            color: var(--secondary-color);
         }
 
-        .nav-link {
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary-color);
+        }
+
+        .nav-sidebar {
+            background-color: var(--surface-color);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+            position: sticky;
+            top: 60px;
+            height: calc(100vh - 60px);
+            border-right: 1px solid var(--border-color);
+        }
+
+        .nav-item {
             color: var(--text-color);
             text-decoration: none;
-            font-weight: 500;
-            transition: color 0.2s ease;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+            font-size: 20px;
+            width: 50px;
+            text-align: center;
         }
 
-        .nav-link:hover {
-            color: var(--primary-color);
+        .nav-item:hover, .nav-item.active {
+            background-color: var(--panel-hover-bg);
+            transform: translateY(-5px);
         }
 
         .main-content {
-            display: flex;
-            flex-grow: 1;
-            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-auto-rows: minmax(200px, auto);
             gap: 20px;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: calc(100vh - 60px);
         }
 
-        .video-container {
-            flex: 2;
-            background-color: var(--surface-color);
+        .panel {
+            background-color: var(--panel-bg);
             border-radius: 15px;
-            overflow: hidden;
+            padding: 20px;
+            backdrop-filter: blur(10px);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .video-container iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        .launch-info {
-            flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
         }
 
-        .info-panel {
-            background-color: var(--surface-color);
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        .panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            background-color: var(--panel-hover-bg);
         }
 
         .panel-title {
@@ -125,52 +154,85 @@
             margin-right: 10px;
         }
 
-        .countdown {
-            font-size: 36px;
-            font-weight: 600;
-            text-align: center;
+        .panel-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            overflow-y: auto;
+        }
+
+        .elongated {
+            grid-column: span 2;
+        }
+
+        .launch-schedule {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .launch-item {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 15px;
             margin-bottom: 10px;
-        }
-
-        .launch-details, .mission-objectives {
-            font-size: 14px;
-        }
-
-        .launch-details div, .mission-objectives li {
-            margin-bottom: 10px;
-        }
-
-        .mission-objectives {
-            padding-left: 20px;
-        }
-
-        .status-indicator {
             display: flex;
             align-items: center;
-            margin-top: 10px;
+            transition: background-color 0.2s ease;
+            border-left: 4px solid var(--primary-color);
         }
 
-        .status-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
+        .launch-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .launch-item i {
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .checklist-item input {
             margin-right: 10px;
         }
 
-        .status-text {
-            font-weight: 500;
+        .live-feed {
+            grid-column: span 4;
+            grid-row: span 2;
         }
 
-        .status-go .status-dot {
-            background-color: #2ecc71;
+        .live-feed video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 15px;
         }
 
-        .status-hold .status-dot {
-            background-color: #f39c12;
+        ::-webkit-scrollbar {
+            width: 8px;
         }
 
-        .status-abort .status-dot {
-            background-color: #e74c3c;
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #0077be;
         }
     </style>
 </head>
@@ -178,51 +240,98 @@
     <div class="container">
         <header class="top-bar">
             <div class="logo"><i class="fas fa-rocket"></i> Artemis SMMS</div>
-            <nav class="nav-links">
-                <a href="index.html" class="nav-link">Dashboard</a>
-                <a href="#" class="nav-link">Missions</a>
-                <a href="#" class="nav-link">Telemetry</a>
-                <a href="#" class="nav-link">Resources</a>
-            </nav>
+            <div class="date-time" id="date-time"></div>
+            <img src="https://i.pravatar.cc/150?img=5" alt="User Avatar" class="user-avatar">
         </header>
+        <nav class="nav-sidebar">
+            <a href="index.html" class="nav-item"><i class="fas fa-home"></i></a>
+            <a href="launch.html" class="nav-item active"><i class="fas fa-rocket"></i></a>
+            <a href="#" class="nav-item"><i class="fas fa-satellite"></i></a>
+            <a href="#" class="nav-item"><i class="fas fa-chart-line"></i></a>
+            <a href="#" class="nav-item"><i class="fas fa-cog"></i></a>
+        </nav>
         <main class="main-content">
-            <div class="video-container">
-                <iframe src="https://www.youtube.com/embed/21X5lGlDOfg" title="SpaceX Launch Live" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <div class="panel live-feed">
+                <h2 class="panel-title"><i class="fas fa-video"></i> Live Launch Feed</h2>
+                <div class="panel-content">
+                    <video autoplay loop muted>
+                        <source src="https://assets.mixkit.co/videos/preview/mixkit-rocket-launching-into-space-4738-large.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
             </div>
-            <div class="launch-info">
-                <div class="info-panel">
-                    <h2 class="panel-title"><i class="fas fa-clock"></i> Launch Countdown</h2>
-                    <div class="countdown" id="countdown">T-00:00:00</div>
-                    <div class="status-indicator status-go">
-                        <div class="status-dot"></div>
-                        <div class="status-text">Status: GO for Launch</div>
+            <div class="panel elongated">
+                <h2 class="panel-title"><i class="fas fa-calendar-alt"></i> Launch Schedule</h2>
+                <div class="panel-content" id="launchSchedule">
+                    <div class="launch-item">
+                        <i class="fas fa-rocket"></i>
+                        <div>
+                            <div class="launch-name">Mission Artemis I</div>
+                            <div class="launch-date">Date: December 31, 2023 - 14:00 UTC</div>
+                        </div>
+                    </div>
+                    <div class="launch-item">
+                        <i class="fas fa-rocket"></i>
+                        <div>
+                            <div class="launch-name">Lunar Lander Deployment</div>
+                            <div class="launch-date">Date: January 15, 2024 - 08:00 UTC</div>
+                        </div>
+                    </div>
+                    <div class="launch-item">
+                        <i class="fas fa-rocket"></i>
+                        <div>
+                            <div class="launch-name">Mars Supply Mission</div>
+                            <div class="launch-date">Date: February 10, 2024 - 18:30 UTC</div>
+                        </div>
                     </div>
                 </div>
-                <div class="info-panel">
-                    <h2 class="panel-title"><i class="fas fa-info-circle"></i> Launch Details</h2>
-                    <div class="launch-details">
-                        <div><strong>Mission:</strong> Artemis 1</div>
-                        <div><strong>Rocket:</strong> Space Launch System (SLS)</div>
-                        <div><strong>Payload:</strong> Orion Spacecraft</div>
-                        <div><strong>Launch Site:</strong> Kennedy Space Center, FL</div>
-                        <div><strong>Launch Window:</strong> 2023-06-15 14:00 UTC</div>
-                    </div>
+            </div>
+            <div class="panel">
+                <h2 class="panel-title"><i class="fas fa-stopwatch"></i> Next Launch Countdown</h2>
+                <div class="panel-content">
+                    <div class="data-value" id="nextLaunchCountdown">T-00:00:00</div>
+                    <div class="data-label">Time until Mission Artemis I</div>
                 </div>
-                <div class="info-panel">
-                    <h2 class="panel-title"><i class="fas fa-tasks"></i> Mission Objectives</h2>
-                    <ul class="mission-objectives">
-                        <li>Test Orion spacecraft systems in lunar orbit</li>
-                        <li>Demonstrate deep space communication capabilities</li>
-                        <li>Recover Orion capsule after atmospheric re-entry</li>
-                        <li>Evaluate radiation protection for future crewed missions</li>
+            </div>
+            <div class="panel">
+                <h2 class="panel-title"><i class="fas fa-tasks"></i> Pre-launch Checklist</h2>
+                <div class="panel-content">
+                    <ul class="checklist" id="preLaunchChecklist">
+                        <li class="checklist-item"><input type="checkbox" id="check1"><label for="check1">Fuel Loading Completed</label></li>
+                        <li class="checklist-item"><input type="checkbox" id="check2"><label for="check2">Weather Conditions Optimal</label></li>
+                        <li class="checklist-item"><input type="checkbox" id="check3"><label for="check3">Communications Systems Checked</label></li>
+                        <li class="checklist-item"><input type="checkbox" id="check4"><label for="check4">Navigation Systems Calibrated</label></li>
+                        <li class="checklist-item"><input type="checkbox" id="check5"><label for="check5">Crew Onboard</label></li>
                     </ul>
+                </div>
+            </div>
+            <div class="panel">
+                <h2 class="panel-title"><i class="fas fa-cloud-sun"></i> Weather Conditions</h2>
+                <div class="panel-content" id="weatherConditions">
+                    <div class="data-value" id="weatherStatus">Clear Skies</div>
+                    <div class="data-label">Temperature: 25°C | Wind Speed: 5 km/h</div>
+                </div>
+            </div>
+            <div class="panel">
+                <h2 class="panel-title"><i class="fas fa-bell"></i> Alerts</h2>
+                <div class="panel-content" id="alerts">
+                    <div class="alert-item"><i class="fas fa-exclamation-triangle"></i> No current alerts.</div>
                 </div>
             </div>
         </main>
     </div>
     <script>
-        function updateCountdown() {
-            const launchDate = new Date('2023-06-15T14:00:00Z').getTime();
+        function updateDateTime() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            document.getElementById('date-time').textContent = now.toLocaleDateString('en-US', options) + ' ' + now.toLocaleTimeString('en-US', timeOptions);
+        }
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+
+        function updateNextLaunchCountdown() {
+            const launchDate = new Date('2023-12-31T14:00:00Z').getTime();
             const now = new Date().getTime();
             const distance = launchDate - now;
 
@@ -231,16 +340,21 @@
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-            document.getElementById('countdown').textContent = `T-${days}d ${hours}h ${minutes}m ${seconds}s`;
+            document.getElementById('nextLaunchCountdown').textContent = `T-${days}d ${hours}h ${minutes}m ${seconds}s`;
 
             if (distance < 0) {
-                clearInterval(countdownTimer);
-                document.getElementById('countdown').textContent = 'LAUNCH';
+                clearInterval(countdownInterval);
+                document.getElementById('nextLaunchCountdown').textContent = 'Launched';
             }
         }
+        const countdownInterval = setInterval(updateNextLaunchCountdown, 1000);
+        updateNextLaunchCountdown();
 
-        const countdownTimer = setInterval(updateCountdown, 1000);
-        updateCountdown();
+        function updateWeatherConditions() {
+            document.getElementById('weatherStatus').textContent = 'Clear Skies';
+            document.getElementById('weatherStatus').nextElementSibling.textContent = 'Temperature: 25°C | Wind Speed: 5 km/h';
+        }
+        updateWeatherConditions();
     </script>
 </body>
 </html>

@@ -3,21 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Artemis SMMS - Launch Coordination</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Artemis SMMS - Launch Control</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --background-color: #000000;
-            --surface-color: rgba(20, 20, 20, 0.8);
-            --panel-bg: rgba(30, 30, 30, 0.7);
-            --panel-hover-bg: rgba(40, 40, 40, 0.8);
+            --surface-color: rgba(20, 20, 20, 0.9);
+            --panel-bg: rgba(30, 30, 30, 0.8);
+            --panel-hover-bg: rgba(40, 40, 40, 0.9);
             --text-color: #ffffff;
             --primary-color: #00a8ff;
             --secondary-color: #7f8c8d;
             --accent-color: #ff6b6b;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
             --border-color: rgba(255, 255, 255, 0.1);
         }
 
@@ -28,12 +29,16 @@
         }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Roboto', sans-serif;
             background-color: var(--background-color);
             color: var(--text-color);
-            line-height: 1.5;
+            line-height: 1.6;
             height: 100vh;
             overflow: hidden;
+            background-image: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=2072&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
         }
 
         .container {
@@ -59,7 +64,7 @@
 
         .logo {
             font-size: 24px;
-            font-weight: 600;
+            font-weight: 700;
             color: var(--primary-color);
             display: flex;
             align-items: center;
@@ -101,7 +106,7 @@
             padding: 15px;
             border-radius: 10px;
             margin-bottom: 10px;
-            transition: background-color 0.2s ease, transform 0.2s ease;
+            transition: all 0.3s ease;
             font-size: 20px;
             width: 50px;
             text-align: center;
@@ -110,12 +115,13 @@
         .nav-item:hover, .nav-item.active {
             background-color: var(--panel-hover-bg);
             transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 168, 255, 0.2);
         }
 
         .main-content {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            grid-auto-rows: minmax(200px, auto);
+            grid-template-rows: repeat(3, minmax(200px, auto));
             gap: 20px;
             padding: 20px;
             overflow-y: auto;
@@ -130,20 +136,19 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             display: flex;
             flex-direction: column;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: all 0.3s ease;
             overflow: hidden;
             border: 1px solid var(--border-color);
         }
 
         .panel:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-            background-color: var(--panel-hover-bg);
+            box-shadow: 0 8px 30px rgba(0, 168, 255, 0.3);
         }
 
         .panel-title {
-            font-size: 20px;
-            font-weight: 600;
+            font-size: 18px;
+            font-weight: 500;
             margin-bottom: 15px;
             color: var(--primary-color);
             display: flex;
@@ -162,13 +167,26 @@
             overflow-y: auto;
         }
 
-        .elongated {
+        .live-feed {
             grid-column: span 2;
+            grid-row: span 2;
         }
 
-        .launch-schedule {
-            display: flex;
-            flex-direction: column;
+        .live-feed .panel-content {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            height: 0;
+            overflow: hidden;
+        }
+
+        .live-feed img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
         }
 
         .launch-item {
@@ -178,12 +196,13 @@
             margin-bottom: 10px;
             display: flex;
             align-items: center;
-            transition: background-color 0.2s ease;
+            transition: all 0.3s ease;
             border-left: 4px solid var(--primary-color);
         }
 
         .launch-item:hover {
             background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
         }
 
         .launch-item i {
@@ -200,24 +219,72 @@
             display: flex;
             align-items: center;
             margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .checklist-item:hover {
+            transform: translateX(5px);
         }
 
         .checklist-item input {
             margin-right: 10px;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--primary-color);
+            border-radius: 5px;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        .live-feed {
-            grid-column: span 4;
-            grid-row: span 2;
+        .checklist-item input:checked {
+            background-color: var(--primary-color);
         }
 
-        .live-feed video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 15px;
+        .checklist-item input:checked::after {
+            content: '\2714';
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--background-color);
+            font-size: 14px;
         }
 
+        .data-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: var(--primary-color);
+        }
+
+        .data-label {
+            font-size: 14px;
+            color: var(--secondary-color);
+        }
+
+        .alert-item {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--warning-color);
+        }
+
+        .alert-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .alert-item i {
+            margin-right: 10px;
+            color: var(--warning-color);
+        }
+
+        /* Scrollbar styles */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -254,13 +321,24 @@
             <div class="panel live-feed">
                 <h2 class="panel-title"><i class="fas fa-video"></i> Live Launch Feed</h2>
                 <div class="panel-content">
-                    <video autoplay loop muted>
-                        <source src="https://assets.mixkit.co/videos/preview/mixkit-rocket-launching-into-space-4738-large.mp4" type="video/mp4">
-                        Your browser does not support the video tag.
-                    </video>
+                    <img src="https://media.giphy.com/media/3o7TKGMZHi73yzCumQ/giphy.gif" alt="Live Launch Feed">
                 </div>
             </div>
-            <div class="panel elongated">
+            <div class="panel">
+                <h2 class="panel-title"><i class="fas fa-stopwatch"></i> Next Launch Countdown</h2>
+                <div class="panel-content">
+                    <div class="data-value" id="nextLaunchCountdown">T-00:00:00</div>
+                    <div class="data-label">Time until Mission Artemis I</div>
+                </div>
+            </div>
+            <div class="panel">
+                <h2 class="panel-title"><i class="fas fa-cloud-sun"></i> Weather Conditions</h2>
+                <div class="panel-content" id="weatherConditions">
+                    <div class="data-value" id="weatherStatus">Clear Skies</div>
+                    <div class="data-label">Temperature: 25°C | Wind Speed: 5 km/h</div>
+                </div>
+            </div>
+            <div class="panel">
                 <h2 class="panel-title"><i class="fas fa-calendar-alt"></i> Launch Schedule</h2>
                 <div class="panel-content" id="launchSchedule">
                     <div class="launch-item">
@@ -287,13 +365,6 @@
                 </div>
             </div>
             <div class="panel">
-                <h2 class="panel-title"><i class="fas fa-stopwatch"></i> Next Launch Countdown</h2>
-                <div class="panel-content">
-                    <div class="data-value" id="nextLaunchCountdown">T-00:00:00</div>
-                    <div class="data-label">Time until Mission Artemis I</div>
-                </div>
-            </div>
-            <div class="panel">
                 <h2 class="panel-title"><i class="fas fa-tasks"></i> Pre-launch Checklist</h2>
                 <div class="panel-content">
                     <ul class="checklist" id="preLaunchChecklist">
@@ -306,16 +377,10 @@
                 </div>
             </div>
             <div class="panel">
-                <h2 class="panel-title"><i class="fas fa-cloud-sun"></i> Weather Conditions</h2>
-                <div class="panel-content" id="weatherConditions">
-                    <div class="data-value" id="weatherStatus">Clear Skies</div>
-                    <div class="data-label">Temperature: 25°C | Wind Speed: 5 km/h</div>
-                </div>
-            </div>
-            <div class="panel">
                 <h2 class="panel-title"><i class="fas fa-bell"></i> Alerts</h2>
                 <div class="panel-content" id="alerts">
-                    <div class="alert-item"><i class="fas fa-exclamation-triangle"></i> No current alerts.</div>
+                    <div class="alert-item"><i class="fas fa-exclamation-triangle"></i> Weather conditions are being closely monitored.</div>
+                    <div class="alert-item"><i class="fas fa-exclamation-triangle"></i> Final systems check in progress.</div>
                 </div>
             </div>
         </main>

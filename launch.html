@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artemis SMMS - Launch Coordination</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --background-color: #0a0a0a;
+            --surface-color: rgba(30, 30, 30, 0.7);
+            --panel-bg: rgba(255, 255, 255, 0.05);
+            --panel-hover-bg: rgba(255, 255, 255, 0.1);
+            --text-color: #ffffff;
+            --primary-color: #00a8ff;
+            --secondary-color: #7f8c8d;
+            --accent-color: #ff6b6b;
+            --border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.5;
+            height: 100vh;
+            overflow: hidden;
+            background-image: url('https://images.unsplash.com/photo-1501630834273-4b5604d2ee31?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            grid-template-rows: 60px 1fr;
+            height: 100vh;
+        }
+
+        .top-bar {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            background-color: var(--surface-color);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+        }
+
+        .logo i {
+            margin-right: 10px;
+        }
+
+        .date-time {
+            font-size: 14px;
+            color: var(--secondary-color);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary-color);
+        }
+
+        .nav-sidebar {
+            background-color: var(--surface-color);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+            position: sticky;
+            top: 60px;
+            height: calc(100vh - 60px);
+            border-right: 1px solid var(--border-color);
+        }
+
+        .nav-item {
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+            font-size: 20px;
+            width: 50px;
+            text-align: center;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background-color: var(--panel-hover-bg);
+            transform: translateY(-5px);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-auto-rows: minmax(200px, auto);
+            gap: 20px;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: calc(100vh - 60px);
+        }
+
+        .panel {
+            background-color: var(--panel-bg);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .panel:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            background-color: var(--panel-hover-bg);
+        }
+
+        .panel-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+        }
+
+        .panel-title i {
+            margin-right: 10px;
+        }
+
+        .panel-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            overflow-y: auto;
+        }
+
+        .elongated {
+            grid-column: span 2;
+        }
+
+        /* Additional styles for launch coordination elements */
+        .launch-schedule {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .launch-item {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.2s ease;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .launch-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .launch-item i {
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .checklist-item input {
+            margin-right: 10px;
+        }
+
+        /* Scrollbar styles */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #0077be;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="top-bar">
+            <div class="logo"><i class="fas fa-rocket"></i> Artemis SMMS</div>
+            <div class="date-time" id="date-time"></div>
+            <img src="https://i.pravatar.cc/150?img=5" alt="User Avatar" class="user-avatar">
+        </header>
+        <nav class="nav-sidebar">
+            <a href="index.html" class="nav-item"><i class="fas fa-home"></i></a>
+            <a href="launch.html" class="nav-item active"><i class="fas fa-rocket"></i></a>
+            <a href="#" class="nav-item"><i class="fas fa-satellite"></i></a>
+            <a href="#" class="nav-item"><i class="fas fa-chart-line"></i></a>
+            <a href="#" class="nav-item"><i class="fas fa-cog"></i></a>
+        </nav>
+        <main class="main-content">
+            <div class="panel elongated">
+                <h2 class="panel-title"><i class="fas fa-calendar-alt"></i> Launch Schedule</h2>
+                <div class="panel-content" id="launchSchedule">
+                    <!-- Launch items -->
+                    <div class="launch-item">
+                        <i class="fas fa-rocket"></i>
+                        <div>
+                            <div class="launch-name">Mission Artemis I</div>
+                            <div class="launch-date">Date: December 31, 2023 - 14:00 UTC</div>
+                        </div>
+                    </div>
+                    <div class="launch-item">
+                        <i class="fas fa-rocket"></i>
+                        <div>
+                            <div class="launch-name">Lunar Lander Deployment</div>
+                            <div class="launch-date">Date: January 15, 2024 - 08:00 UTC</div>
+                        </div>
+                    </div>
+                    <div class="launch-item">
+                        <i class="fas fa-rocket"></i>
+                        <div>
+                            <div class="launch-name">Mars Supply Mission</div>
+                            <div class="launch-date">Date: February 10, 2024 - 18:30 UTC</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel">
+                <h2 class="panel-title"><i class="fas fa-stopwatch"></i> Next Launch Countdown</h2>
+                <div class="panel-content">
+                    <div class="data-value" id="nextLaunchCountdown">T-00:00:00</div>
+                    <div class="data-label">Time until Mission Artemis I</div>
+                </div>
+            </div>
+            <div class="panel">
+                <h2 class="panel-title"><i class="fas fa-tasks"></i> Pre-launch Checklist</h2>
+                <div class="panel-content">
+                    <ul class="checklist" id="preLaunchChecklist">
+                        <li class="checklist-item"><input type="checkbox" id="check1"><label for="check1">Fuel Loading Completed</label></li>
+                        <li class="checklist-item"><input type="checkbox" id="check2"><label for="check2">Weather Conditions Optimal</label></li>
+                        <li class="checklist-item"><input type="checkbox" id="check3"><label for="check3">Communications Systems Checked</label></li>
+                        <li class="checklist-item"><input type="checkbox" id="check4"><label for="check4">Navigation Systems Calibrated</label></li>
+                        <li class="checklist-item"><input type="checkbox" id="check5"><label for="check5">Crew Onboard</label></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="panel elongated">
+                <h2 class="panel-title"><i class="fas fa-map-marker-alt"></i> Launch Site Map</h2>
+                <div class="panel-content" id="launchSiteMap">
+                    <!-- Map placeholder, in actual implementation this would be a map -->
+                    <img src="https://via.placeholder.com/600x400?text=Launch+Site+Map" alt="Launch Site Map" style="width:100%; height:auto; border-radius:15px;">
+                </div>
+            </div>
+            <div class="panel elongated">
+                <h2 class="panel-title"><i class="fas fa-comments"></i> Communication Channel</h2>
+                <div class="panel-content" id="communicationChannel">
+                    <div id="messages" style="flex-grow:1; overflow-y:auto; margin-bottom:10px;">
+                        <!-- Messages will appear here -->
+                        <div class="message"><strong>Mission Control:</strong> All systems are nominal.</div>
+                        <div class="message"><strong>Launch Director:</strong> Proceeding with final checks.</div>
+                    </div>
+                    <div style="display:flex;">
+                        <input type="text" id="messageInput" placeholder="Type a message..." style="flex-grow:1; padding:10px; border-radius:5px 0 0 5px; border:none;">
+                        <button id="sendMessage" style="padding:10px 20px; border:none; background-color:var(--primary-color); color:#fff; border-radius:0 5px 5px 0; cursor:pointer;"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="panel">
+                <h2 class="panel-title"><i class="fas fa-cloud-sun"></i> Weather Conditions</h2>
+                <div class="panel-content" id="weatherConditions">
+                    <div class="data-value" id="weatherStatus">Clear Skies</div>
+                    <div class="data-label">Temperature: 25°C | Wind Speed: 5 km/h</div>
+                </div>
+            </div>
+            <div class="panel">
+                <h2 class="panel-title"><i class="fas fa-bell"></i> Alerts</h2>
+                <div class="panel-content" id="alerts">
+                    <div class="alert-item"><i class="fas fa-exclamation-triangle"></i> No current alerts.</div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script>
+        function updateDateTime() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            document.getElementById('date-time').textContent = now.toLocaleDateString('en-US', options) + ' ' + now.toLocaleTimeString('en-US', timeOptions);
+        }
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+
+        function updateNextLaunchCountdown() {
+            const launchDate = new Date('2023-12-31T14:00:00Z').getTime();
+            const now = new Date().getTime();
+            const distance = launchDate - now;
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById('nextLaunchCountdown').textContent = `T-${days}d ${hours}h ${minutes}m ${seconds}s`;
+
+            if (distance < 0) {
+                clearInterval(countdownInterval);
+                document.getElementById('nextLaunchCountdown').textContent = 'Launched';
+            }
+        }
+        const countdownInterval = setInterval(updateNextLaunchCountdown, 1000);
+        updateNextLaunchCountdown();
+
+        // Communication Channel Functionality
+        document.getElementById('sendMessage').addEventListener('click', function() {
+            const messageInput = document.getElementById('messageInput');
+            const messages = document.getElementById('messages');
+
+            if (messageInput.value.trim() !== '') {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message');
+                messageDiv.innerHTML = `<strong>You:</strong> ${messageInput.value}`;
+                messages.appendChild(messageDiv);
+                messageInput.value = '';
+                messages.scrollTop = messages.scrollHeight;
+            }
+        });
+
+        // Weather Conditions (Static for example purposes)
+        function updateWeatherConditions() {
+            // In a real implementation, you would fetch weather data from an API
+            document.getElementById('weatherStatus').textContent = 'Clear Skies';
+            document.getElementById('weatherStatus').nextElementSibling.textContent = 'Temperature: 25°C | Wind Speed: 5 km/h';
+        }
+        updateWeatherConditions();
+    </script>
+</body>
+</html>
